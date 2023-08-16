@@ -2,7 +2,7 @@ from setuptools import setup
 import re
 
 VERSION = ''
-with open("core/__init__.py") as f:
+with open("moon/__init__.py") as f:
     tmp = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE)
     if tmp:
         VERSION = tmp.group(1)
@@ -11,7 +11,7 @@ if not VERSION:
     raise RuntimeError("version is not set")
 
 PACKAGES = [
-    "core"
+    "moon"
 ]
 
 setup(
