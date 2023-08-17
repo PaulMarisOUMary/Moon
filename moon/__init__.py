@@ -5,4 +5,5 @@ __copyright__ = 'Copyright 2023-present PaulMarisOUMary'
 __version__ = '0.0.0a'
 
 from .main import *
-from .lexer import build_lexer
+from .lexer import build_lexer, tokens
+from .parser import parse_code

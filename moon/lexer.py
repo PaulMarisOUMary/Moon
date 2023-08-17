@@ -100,21 +100,25 @@ def t_COMMENT(t):
 # Comment rule for multi-line comments
 def t_MULTILINE_COMMENT(t):
 	r'\([\s\S]*?\)'
+	t.lexer.lineno += t.value.count('\n')
 	return t
 
 # A string containing ignored characters (spaces and tabs)
 t_ignore = ' '
 
+def t_ignore_TABULATION_FOLLOWED_BY_NEWLINES(t):
+    r'\t+\n'
+    t.lexer.lineno += t.value.count('\n')
+
 def t_TABULATION(t):
-	r'\t+'
-	#t.lexer.lineno += len(t.value)
-	return t
+    r'\t+(?!\n)'
+    return t
 
 # Newline handling
 def t_NEWLINE(t):
-	r'\n+'
-	t.lexer.lineno += len(t.value)
-	return t
+    r'\n+'
+    t.lexer.lineno += t.value.count('\n')
+    return t
 
 # Error handling
 def t_error(t):
@@ -134,6 +138,8 @@ if __name__ == "__main__":
 	another comment here
 )
 
+			
+	
 variable is (sneaky comment) 5
 
 (action addNumbers a b
@@ -143,6 +149,16 @@ action addNumbers a b
 	result a + b
 sum is addNumbers 1 2
 print sum
+
+thing Person
+	has name
+
+	action default name
+		print name
+
+	action greet
+		print "Hello, I'm " + name
+
 (
 '''
 	lexer = build_lexer()
