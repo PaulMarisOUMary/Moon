@@ -1,5 +1,8 @@
 import ply.lex as lex
 
+# A string containing ignored characters (spaces and tabs)
+t_ignore = ' '
+
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
 t_MINUS = r'-'
@@ -56,7 +59,9 @@ reserved = {
 
 # List of token names
 tokens = [
-	'COMMENT', 'MULTILINE_COMMENT', 'TABULATION', 'NEWLINE',
+	'INBODY', 'ENDBODY',
+	'TABULATION', 'NEWLINE',
+	'COMMENT', 'MULTILINE_COMMENT',
 	'IDENTIFIER', 'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
 	'PLUS', 'MINUS', 'MULTIPLY', 'DIVIDE', 'MODULO', 'EXPONENT',
 	'LT', 'LE', 'GT', 'GE', 'EQ', 'NE',
@@ -70,21 +75,21 @@ def t_IDENTIFIER(t):
 
 # Floating-point literal rule
 def t_FLOAT(t):
-    r'\d+\.\d+'
-    t.value = float(t.value)
-    return t
+	r'\d+\.\d+'
+	t.value = float(t.value)
+	return t
 
 # Integer literal rule
 def t_INTEGER(t):
-    r'\b(0|[1-9][0-9]*)\b'
-    t.value = int(t.value)
-    return t
+	r'\b(0|[1-9][0-9]*)\b'
+	t.value = int(t.value)
+	return t
 
 # String literal rule
 def t_STRING(t):
-    r'"(\\.|[^"\\])*"'
-    t.value = t.value[1:-1]  # Remove the quotes
-    return t
+	r'"(\\.|[^"\\])*"'
+	t.value = t.value[1:-1]  # Remove the quotes
+	return t
 
 # Boolean literal rule
 def t_BOOLEAN(t):
@@ -103,22 +108,14 @@ def t_MULTILINE_COMMENT(t):
 	t.lexer.lineno += t.value.count('\n')
 	return t
 
-# A string containing ignored characters (spaces and tabs)
-t_ignore = ' '
-
-def t_ignore_TABULATION_FOLLOWED_BY_NEWLINES(t):
-    r'\t+\n'
-    t.lexer.lineno += t.value.count('\n')
-
 def t_TABULATION(t):
-    r'\t+(?!\n)'
-    return t
+	r'\t'
+	return t
 
-# Newline handling
 def t_NEWLINE(t):
-    r'\n+'
-    t.lexer.lineno += t.value.count('\n')
-    return t
+	r'\n+'
+	t.lexer.lineno += len(t.value)
+	return t
 
 # Error handling
 def t_error(t):
@@ -127,44 +124,76 @@ def t_error(t):
 	t.lexer.skip(1)
 
 def build_lexer(**kwargs):
-	lexer = lex.lex(**kwargs)
-	lexer.errors = []
+	lexer = IndentLexer(**kwargs)
 	return lexer
 
-# Test the lexer
-if __name__ == "__main__":
-	data = '''# comment here
-(
-	another comment here
-)
+class IndentLexer(object):
+	def __init__(self, **kwargs) -> None:
+		self.lexer = lex.lex(**kwargs)
+		self.lexer.errors = []
+		self.token_stream = None
 
-			
+	@property
+	def errors(self):
+		return self.lexer.errors
+
+	def _new_token(self, type, lineno):
+		tok = lex.LexToken()
+		tok.type = type
+		tok.value = None
+		tok.lineno = lineno
+		tok.lexpos = 0
+		return tok
+
+	def _indentation_filter(self, tokens):
+		indentation_stack = [0]
+		current_indentation = 0
+		indentation_count = 0
+
+		for token in tokens:
+			if token.type == 'NEWLINE':
+				indentation_count = 0
+				yield token
+			elif token.type == 'TABULATION':
+				indentation_count += 1
+				continue  # Continue to the next token
+			else:
+				current_indentation = indentation_count
+				# Check for an increase in indentation
+				if current_indentation > indentation_stack[-1]:
+					for _ in range(current_indentation - indentation_stack[-1]):
+						yield self._new_token('INBODY', token.lineno)
+					indentation_stack.append(current_indentation)
+				# Check for a decrease in indentation
+				elif current_indentation < indentation_stack[-1]:
+					for _ in range(indentation_stack[-1] - current_indentation):
+						yield self._new_token('ENDBODY', token.lineno)
+						indentation_stack.pop()
+				yield token
+
+		# Handle any remaining dedentation at the end of the file
+		for _ in range(indentation_stack[-1]):
+			yield self._new_token('ENDBODY', token.lineno if token else 0)
+
+
+	def _indent_tokens(self, lexer):
+		token = None
+		tokens = iter(lexer.token, None)
+		for token in self._indentation_filter(tokens):
+			yield token
+
+	def input(self, data):
+		self.lexer.input(data)
+		self.token_stream = self._indent_tokens(self.lexer)
+
+	def __iter__(self):
+		return self.token_stream
 	
-variable is (sneaky comment) 5
+	def __list__(self):
+		return self.token_stream
 
-(action addNumbers a b
-	comment that contains a keyword etc)
-
-action addNumbers a b
-	result a + b
-sum is addNumbers 1 2
-print sum
-
-thing Person
-	has name
-
-	action default name
-		print name
-
-	action greet
-		print "Hello, I'm " + name
-
-(
-'''
-	lexer = build_lexer()
-
-	lexer.input(data)
-	for token in lexer:
-		print(token)
-
-	print(lexer.errors)
+	def token(self):
+		try:
+			return next(self.token_stream)
+		except StopIteration:
+			return None
