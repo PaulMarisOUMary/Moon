@@ -92,6 +92,34 @@ def test_if_statements(input_code, expected_output):
 
 # While statements
 @pytest.mark.parametrize("input_code, expected_output", [
+    ("while true\n\t1", [('while_statement', ('boolean_literal', 'true'), [('integer_literal', 1)])]),
+    ("while true\n\t1\nwhile false or true\n\t2\n\twhile true\n\t\twhile true\n\t\t\t3\n\t4", [
+	('while_statement', ('boolean_literal', 'true'), [
+		('integer_literal', 1)]), 
+	('while_statement', ('logical_expression', 'or', ('boolean_literal', 'false'), ('boolean_literal', 'true')), [
+		('integer_literal', 2), 
+		('while_statement', ('boolean_literal', 'true'), [
+			('while_statement', ('boolean_literal', 'true'), [
+				('integer_literal', 3)
+				])
+			]), 
+		('integer_literal', 4)
+	])
+]),
 ])
 def test_while_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Break statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("stop\n", [('break_statement',)]),
+])
+def test_break_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Continue statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("continue\n", [('continue_statement',)]),
+])
+def test_continue_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output

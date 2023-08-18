@@ -27,12 +27,19 @@ def p_statements(p):
 
 def p_statement(p):
 	"""statement : line NEWLINE
-				 | if_statement"""
+				 | if_statement
+				 | while_statement
+				 | break_statement
+				 | continue_statement"""
 	p[0] = p[1]
 
 def p_if_statement(p):
-	"""if_statement : IF boolean_literal suite"""
+	"""if_statement : IF conditional_test suite"""
 	p[0] = ('if_statement', p[2], p[3])
+
+def p_while_statement(p):
+	"""while_statement : WHILE conditional_test suite"""
+	p[0] = ('while_statement', p[2], p[3])
 
 def p_suite(p):
 	"""suite : NEWLINE INDENT statements DEDENT"""
@@ -46,6 +53,14 @@ def p_line(p):
 def p_variable_declaration_statement(p):
 	"""variable_declaration_statement : IDENTIFIER IS expression"""
 	p[0] = ('variable_declaration_statement', p[1], p[3])
+
+def p_conditional_test(p):
+	"""conditional_test : comparison_expression
+			   | logical_expression
+			   | arithmetic_expression
+			   | boolean_literal
+			   | null_literal"""
+	p[0] = p[1]
 
 def p_literals(p):
 	"""literals : integer_literal
@@ -110,6 +125,14 @@ def p_logical_expression(p):
 	else:
 		p[0] = ('logical_expression', p[1], p[2])
 
+def p_break_statement(p):
+	"""break_statement : STOP NEWLINE"""
+	p[0] = ('break_statement',)
+
+def p_continue_statement(p):
+	"""continue_statement : CONTINUE NEWLINE"""
+	p[0] = ('continue_statement',)
+
 def p_error(p):
 	if p:
 		print("Syntax error at '%s'" % p.value)
@@ -145,7 +168,15 @@ def parse_code(code: str):
 if __name__ == '__main__':
 	code = """
 variable is 5
-if true
+while true
+	1
+while false or true
+	2
+	while true
+		while true
+			3
+	4
+if true and false
 	if false
 		variable is 3
 		if true
