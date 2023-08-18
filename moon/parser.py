@@ -13,78 +13,34 @@ precedence = (
 	('right', 'EXPONENT'),
 )
 
-# Program
 def p_program(p):
-	'program : statements'
+	"""program : statements"""
 	p[0] = p[1]
 
-# Statements
 def p_statements(p):
-	'''statements : statements statement NEWLINE
-				  | statements NEWLINE
-				  | statement'''
-	if len(p) == 4:
+	"""statements : statements statement
+				  | statement"""
+	if len(p) == 3:
 		p[0] = p[1] + [p[2]]
-	elif len(p) == 3:
-		p[0] = p[1]  # Ignore the newline token
 	else:
 		p[0] = [p[1]]
 
-# Statement
 def p_statement(p):
-	'''statement : variable_declaration
-				 | expression'''
+	"""statement : expression NEWLINE
+				 | compound_statement"""
 	p[0] = p[1]
 
-# Variable Declaration
-def p_variable_declaration(p):
-	'''variable_declaration : IDENTIFIER IS expression'''
-	p[0] = ('variable_declaration', p[1], p[3])
+def p_compound_statement(p):
+	"""compound_statement : LIST NEWLINE INBODY statements ENDBODY"""
+	p[0] = ('list', [x for x in p[4] if x is not None])
 
-# Expression rules
-def p_expression_arithmetic(p):
-	'''expression : expression PLUS expression
-				  | expression MINUS expression
-				  | expression MULTIPLY expression
-				  | expression DIVIDE expression
-				  | expression MODULO expression
-				  | expression EXPONENT expression'''
-	p[0] = (p[2], p[1], p[3])
-
-def p_expression_logical(p):
-	'''expression : expression AND expression
-				  | expression OR expression'''
-	p[0] = (p[2], p[1], p[3])
-
-def p_expression_not(p):
-	'expression : NOT expression'
-	p[0] = ('not', p[2])
-
-def p_expression_relational(p):
-	'''expression : expression LT expression
-				  | expression LE expression
-				  | expression GT expression
-				  | expression GE expression
-				  | expression IS expression
-				  | expression ISNT expression'''
-	p[0] = (p[2], p[1], p[3])
-
-def p_expression_literal(p):
-	'''expression : INTEGER
-				  | FLOAT
-				  | STRING
-				  | BOOLEAN
-				  | NULL'''
+def p_expression(p):
+	"""expression : INTEGER
+				  | compound_statement"""
 	p[0] = p[1]
 
-# Error handling
 def p_error(p):
-	print("Syntax error at '%s'" % p)
-
-# Empty rule
-def p_empty(p):
-	'empty :'
-	p[0] = None
+	print("Syntax error at '%s'" % p.value)
 
 def print_tokens(code):
 	lexer = build_lexer()
@@ -113,6 +69,28 @@ def parse_code(code):
 	return result
 
 if __name__ == '__main__':
-	code = """variable is 1"""
+	code = """list
+	1
+	2
+	list
+		3
+		list
+			4
+	5
+"""
 	result = parse_code(code)
 	print(result)
+		
+[
+	('list', [
+		1,
+		2,
+		('list', [
+			3,
+			('list', [
+				4
+				])
+			])
+		]),
+		5
+]
