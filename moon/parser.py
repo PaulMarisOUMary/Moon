@@ -33,7 +33,8 @@ def p_statement(p):
 				 | while_statement
 				 | break_statement
 				 | continue_statement
-				 | action_statement"""
+				 | action_statement
+				 | call_statement"""
 	p[0] = p[1]
 
 def p_if_statement(p):
@@ -48,9 +49,22 @@ def p_action_statement(p):
 	"""action_statement : ACTION IDENTIFIER optional_params suite"""
 	p[0] = ('action_statement', p[2], p[3], p[4])
 
+def p_call_statement(p):
+	"""call_statement : CALL IDENTIFIER optional_call_params NEWLINE"""
+	p[0] = ('call_statement', p[2], p[3])
+
 def p_optional_params(p):
 	"""optional_params : IDENTIFIER optional_params
 					   | empty"""
+	if len(p) == 3:
+		p[0] = [p[1]] + p[2]
+	else:
+		p[0] = []
+
+def p_optional_call_params(p):
+	"""optional_call_params : expression optional_call_params
+					   		| IDENTIFIER optional_call_params
+					   		| empty"""
 	if len(p) == 3:
 		p[0] = [p[1]] + p[2]
 	else:
@@ -186,13 +200,6 @@ def parse_code(code: str):
 
 if __name__ == '__main__':
 	code = """
-variable is 5
-thing Human
-	has name
-
-thing Animal
-	action default a
-		1
-"""
+call x 1 z"""
 	result = parse_code(code)
 	pprint(result, indent=4)

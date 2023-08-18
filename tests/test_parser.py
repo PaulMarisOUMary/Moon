@@ -145,3 +145,12 @@ def test_continue_statements(input_code, expected_output):
 ])
 def test_action_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output
+
+# Call statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("call x\n", [('call_statement', 'x', [])]),
+    ("call x y\n", [('call_statement', 'x', ['y'])]),
+    ("call x 1 z\n", [('call_statement', 'x', [('integer_literal', 1), 'z'])]),
+])
+def test_call_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output

@@ -23,6 +23,7 @@ reserved = {
 	'assert': 'ASSERT', # ❌
 	'async': 'ASYNC', # ❌
 	'await': 'AWAIT', # ❌
+	'call': 'CALL',
 	'continue': 'CONTINUE',
 	#'default': 'DEFAULT', # ❌
 	'dict': 'DICT',
