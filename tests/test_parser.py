@@ -123,3 +123,25 @@ def test_break_statements(input_code, expected_output):
 ])
 def test_continue_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output
+
+# Action statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("action x\n\t1", [('action_statement', 'x', [], [('integer_literal', 1)])]),
+    ("action x y\n\t1", [('action_statement', 'x', ['y'], [('integer_literal', 1)])]),
+    ("action x y z\n\t1", [('action_statement', 'x', ['y', 'z'], [('integer_literal', 1)])]),
+    ("action x\n\t1\n\taction y a b\n\t\t2\n\t\t3\n\t\taction z\n\t\t\t4\n\t5", [
+        ('action_statement', 'x', [], [
+            ('integer_literal', 1),
+            ('action_statement', 'y', ['a', 'b'], [
+                ('integer_literal', 2),
+                ('integer_literal', 3),
+                ('action_statement', 'z', [], [
+                    ('integer_literal', 4)
+                ])
+            ]),
+            ('integer_literal', 5)
+        ])
+    ]),
+])
+def test_action_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output

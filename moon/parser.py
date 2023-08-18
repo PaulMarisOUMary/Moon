@@ -1,5 +1,7 @@
 import ply.yacc as yacc
 
+from pprint import pprint
+
 from moon import tokens, build_lexer
 
 precedence = (
@@ -30,7 +32,8 @@ def p_statement(p):
 				 | if_statement
 				 | while_statement
 				 | break_statement
-				 | continue_statement"""
+				 | continue_statement
+				 | action_statement"""
 	p[0] = p[1]
 
 def p_if_statement(p):
@@ -40,6 +43,18 @@ def p_if_statement(p):
 def p_while_statement(p):
 	"""while_statement : WHILE conditional_test suite"""
 	p[0] = ('while_statement', p[2], p[3])
+
+def p_action_statement(p):
+	"""action_statement : ACTION IDENTIFIER optional_params suite"""
+	p[0] = ('action_statement', p[2], p[3], p[4])
+
+def p_optional_params(p):
+	"""optional_params : IDENTIFIER optional_params
+					   | empty"""
+	if len(p) == 3:
+		p[0] = [p[1]] + p[2]
+	else:
+		p[0] = []
 
 def p_suite(p):
 	"""suite : NEWLINE INDENT statements DEDENT"""
@@ -133,6 +148,10 @@ def p_continue_statement(p):
 	"""continue_statement : CONTINUE NEWLINE"""
 	p[0] = ('continue_statement',)
 
+def p_empty(p):
+	"""empty :"""
+	pass
+
 def p_error(p):
 	if p:
 		print("Syntax error at '%s'" % p.value)
@@ -143,7 +162,7 @@ def print_tokens(code):
 	lexer = build_lexer()
 	lexer.input(code)
 	print('----- Tokens -----')
-	for token in lexer:
+	for token in lexer: # type: ignore
 		print(token)
 	print('----- ERRORS -----')
 	for error in lexer.errors:
@@ -168,20 +187,12 @@ def parse_code(code: str):
 if __name__ == '__main__':
 	code = """
 variable is 5
-while true
-	1
-while false or true
-	2
-	while true
-		while true
-			3
-	4
-if true and false
-	if false
-		variable is 3
-		if true
-			variable is 5
-		variable is 6
-x is 5"""
+thing Human
+	has name
+
+thing Animal
+	action default a
+		1
+"""
 	result = parse_code(code)
-	print('R', result)
+	pprint(result, indent=4)

@@ -20,7 +20,7 @@ from moon import build_lexer
 	("async", "ASYNC"),
 	("await", "AWAIT"),
 	("continue", "CONTINUE"),
-	("default", "DEFAULT"),
+	#("default", "DEFAULT"),
 	("dict", "DICT"),
 	("elif", "ELIF"),
 	("else", "ELSE"),
