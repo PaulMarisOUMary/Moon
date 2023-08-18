@@ -6,41 +6,60 @@ precedence = (
 	('left', 'OR'),
 	('left', 'AND'),
 	('right', 'NOT'),
-	('nonassoc', 'IS', 'ISNT'),
 	('nonassoc', 'LT', 'LE', 'GT', 'GE'),
 	('left', 'PLUS', 'MINUS'),
 	('left', 'MULTIPLY', 'DIVIDE', 'MODULO'),
 	('right', 'EXPONENT'),
 )
 
+# The program is composed of 'statements'
 def p_program(p):
-	"""program : statements"""
-	p[0] = p[1]
+    """program : statements"""
+    p[0] = p[1]
 
 def p_statements(p):
-	"""statements : statements statement
-				  | statement"""
-	if len(p) == 3:
-		p[0] = p[1] + [p[2]]
-	else:
-		p[0] = [p[1]]
+    """statements : statements statement
+                  | statement"""
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = [p[1]]
 
 def p_statement(p):
-	"""statement : expression NEWLINE
-				 | compound_statement"""
-	p[0] = p[1]
+    """statement : line NEWLINE
+                 | if_statement"""
+    p[0] = p[1]
 
-def p_compound_statement(p):
-	"""compound_statement : LIST NEWLINE INBODY statements ENDBODY"""
-	p[0] = ('list', [x for x in p[4] if x is not None])
+def p_if_statement(p):
+    """if_statement : IF literal suite"""
+    p[0] = ('if_statement', p[2], p[3])
 
-def p_expression(p):
-	"""expression : INTEGER
-				  | compound_statement"""
-	p[0] = p[1]
+def p_suite(p):
+    """suite : NEWLINE INDENT statements DEDENT"""
+    p[0] = p[3]
+
+def p_line(p):
+    """line : assignment
+            | literal"""
+    p[0] = p[1]
+
+def p_assignment(p):
+    """assignment : IDENTIFIER IS literal"""
+    p[0] = ('variable_assignation', p[1], p[3])
+
+def p_literal(p):
+    """literal : INTEGER
+               | FLOAT
+               | STRING
+               | BOOLEAN
+               | NULL"""
+    p[0] = p[1]
 
 def p_error(p):
-	print("Syntax error at '%s'" % p.value)
+    if p:
+        print("Syntax error at '%s'" % p.value)
+    else:
+        print("Syntax error at EOF")
 
 def print_tokens(code):
 	lexer = build_lexer()
@@ -69,28 +88,10 @@ def parse_code(code):
 	return result
 
 if __name__ == '__main__':
-	code = """list
-	1
-	2
-	list
-		3
-		list
-			4
-	5
-"""
+	code = """if 1
+	if 2
+		if 3
+			y is 4
+x is 5"""
 	result = parse_code(code)
-	print(result)
-		
-[
-	('list', [
-		1,
-		2,
-		('list', [
-			3,
-			('list', [
-				4
-				])
-			])
-		]),
-		5
-]
+	print('R', result)
