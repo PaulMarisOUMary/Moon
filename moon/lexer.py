@@ -59,7 +59,7 @@ reserved = {
 
 # List of token names
 tokens = [
-	'INBODY', 'ENDBODY',
+	'INDENT', 'DEDENT',
 	'TABULATION', 'NEWLINE',
 	'COMMENT', 'MULTILINE_COMMENT',
 	'IDENTIFIER', 'INTEGER', 'FLOAT', 'STRING', 'BOOLEAN',
@@ -137,44 +137,45 @@ class IndentLexer(object):
 	def errors(self):
 		return self.lexer.errors
 
-	def _new_token(self, type, lineno):
+	def _new_token(self, type, value, lineno):
 		tok = lex.LexToken()
 		tok.type = type
-		tok.value = None
+		tok.value = value
 		tok.lineno = lineno
 		tok.lexpos = 0
 		return tok
 
 	def _indentation_filter(self, tokens):
-		indentation_stack = [0]
 		current_indentation = 0
 		indentation_count = 0
 
 		for token in tokens:
 			if token.type == 'NEWLINE':
 				indentation_count = 0
+
 				yield token
-			elif token.type == 'TABULATION':
-				indentation_count += 1
-				continue  # Continue to the next token
-			else:
+
+				next_token = next(tokens, None)
+				while next_token and next_token.type == 'TABULATION':
+					indentation_count += 1
+					next_token = next(tokens, None)
+
+				if indentation_count > current_indentation:
+					yield self._new_token('INDENT', indentation_count * '\t', token.lineno)
+
+				if indentation_count < current_indentation:
+					for i in range(current_indentation - indentation_count):
+						yield self._new_token('DEDENT', (current_indentation-(i+1))*'\t', token.lineno)
+
 				current_indentation = indentation_count
-				# Check for an increase in indentation
-				if current_indentation > indentation_stack[-1]:
-					for _ in range(current_indentation - indentation_stack[-1]):
-						yield self._new_token('INBODY', token.lineno)
-					indentation_stack.append(current_indentation)
-				# Check for a decrease in indentation
-				elif current_indentation < indentation_stack[-1]:
-					for _ in range(indentation_stack[-1] - current_indentation):
-						yield self._new_token('ENDBODY', token.lineno)
-						indentation_stack.pop()
+
+				if next_token:
+					yield next_token
+			else:
 				yield token
 
-		# Handle any remaining dedentation at the end of the file
-		for _ in range(indentation_stack[-1]):
-			yield self._new_token('ENDBODY', token.lineno if token else 0)
-
+		for i in range(current_indentation):
+			yield self._new_token('DEDENT', (current_indentation-i)*'\t', token.lineno if token else 0)
 
 	def _indent_tokens(self, lexer):
 		token = None
@@ -197,3 +198,56 @@ class IndentLexer(object):
 			return next(self.token_stream)
 		except StopIteration:
 			return None
+		
+# Test the lexer
+if __name__ == "__main__":
+	data = """if 1
+	if 2
+		variable is 3
+		if 4
+			variable is 5
+		variable is 6
+x is 5
+"""
+	d = """if 1
+	if 2
+		variable is 3
+		if 4
+			variable is 5
+		variable is 6
+x is 5
+"""
+	ata = '''list
+	1
+	list
+		2
+		3
+		list
+			4
+	5
+'''
+	dta = '''# comment here
+(
+	another comment here
+)
+			
+	
+variable is (sneaky comment) 5
+(action addNumbers a b
+	comment that contains a keyword etc)
+action addNumbers a b
+	result a + b
+sum is addNumbers 1 2
+print sum
+thing Person
+	has name
+	action default name
+		print name
+	action greet
+		print "Hello, I'm " + name
+'''
+	lexer = build_lexer()
+	lexer.input(data)
+	for token in lexer:
+		print(token)
+	print(lexer.errors)
