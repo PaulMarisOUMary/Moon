@@ -20,6 +20,7 @@ reserved = {
 	'action': 'ACTION',
 	'and': 'AND',
 	'as': 'AS',
+	'ask': 'ASK',
 	'assert': 'ASSERT', # ❌
 	'async': 'ASYNC', # ❌
 	'await': 'AWAIT', # ❌
@@ -47,6 +48,7 @@ reserved = {
 	'nothing': 'NOTHING', # ❌
 	'or': 'OR',
 	'pass': 'PASS', # ❌
+	'print': 'PRINT',
 	'raise': 'RAISE',
 	'result': 'RESULT',
 	'test': 'TEST',

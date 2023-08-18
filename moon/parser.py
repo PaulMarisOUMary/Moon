@@ -2,7 +2,7 @@ import ply.yacc as yacc
 
 from pprint import pprint
 
-from moon import tokens, build_lexer
+from .lexer import tokens, build_lexer
 
 precedence = (
 	('left', 'OR'),
@@ -34,7 +34,9 @@ def p_statement(p):
 				 | break_statement
 				 | continue_statement
 				 | action_statement
-				 | call_statement"""
+				 | result_statement
+				 | call_statement
+				 | print_statement"""
 	p[0] = p[1]
 
 def p_if_statement(p):
@@ -50,8 +52,8 @@ def p_action_statement(p):
 	p[0] = ('action_statement', p[2], p[3], p[4])
 
 def p_call_statement(p):
-	"""call_statement : CALL IDENTIFIER optional_call_params NEWLINE"""
-	p[0] = ('call_statement', p[2], p[3])
+    """call_statement : CALL IDENTIFIER optional_call_params"""
+    p[0] = ('call_statement', p[2], p[3])
 
 def p_optional_params(p):
 	"""optional_params : IDENTIFIER optional_params
@@ -63,7 +65,6 @@ def p_optional_params(p):
 
 def p_optional_call_params(p):
 	"""optional_call_params : expression optional_call_params
-					   		| IDENTIFIER optional_call_params
 					   		| empty"""
 	if len(p) == 3:
 		p[0] = [p[1]] + p[2]
@@ -80,8 +81,8 @@ def p_line(p):
 	p[0] = p[1]
 
 def p_variable_declaration_statement(p):
-	"""variable_declaration_statement : IDENTIFIER IS expression"""
-	p[0] = ('variable_declaration_statement', p[1], p[3])
+    """variable_declaration_statement : IDENTIFIER IS expression"""
+    p[0] = ('variable_declaration_statement', p[1], p[3])
 
 def p_conditional_test(p):
 	"""conditional_test : comparison_expression
@@ -123,7 +124,9 @@ def p_expression(p):
 	"""expression : literals
 				  | comparison_expression
 				  | arithmetic_expression
-				  | logical_expression"""
+				  | logical_expression
+				  | call_statement
+				  | IDENTIFIER"""
 	p[0] = p[1]
 
 def p_comparison_expression(p):
@@ -162,6 +165,38 @@ def p_continue_statement(p):
 	"""continue_statement : CONTINUE NEWLINE"""
 	p[0] = ('continue_statement',)
 
+def p_result(p):
+	"""result_statement : RESULT optional_results NEWLINE
+						| RESULT NEWLINE"""
+	if len(p) == 4:
+		p[0] = ('return_statement', p[2])
+	else:
+		p[0] = ('return_statement', [])
+
+def p_optional_result(p):
+	"""optional_results : expression optional_results
+					   | expression"""
+	if len(p) == 3:
+		p[0] = [p[1]] + p[2]
+	else:
+		p[0] = [p[1]]
+
+def p_print_statement(p):
+	"""print_statement : PRINT optional_prints NEWLINE
+					   | PRINT NEWLINE"""
+	if len(p) == 4:
+		p[0] = ('print_statement', p[2])
+	else:
+		p[0] = ('print_statement', [])
+
+def p_optional_prints(p):
+	"""optional_prints : expression optional_prints
+					   | expression"""
+	if len(p) == 3:
+		p[0] = [p[1]] + p[2]
+	else:
+		p[0] = [p[1]]
+
 def p_empty(p):
 	"""empty :"""
 	pass
@@ -199,7 +234,6 @@ def parse_code(code: str):
 	return result
 
 if __name__ == '__main__':
-	code = """
-call x 1 z"""
+	code = """variable is call a 1 2 3"""
 	result = parse_code(code)
 	pprint(result, indent=4)

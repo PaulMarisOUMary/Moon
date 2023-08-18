@@ -154,3 +154,30 @@ def test_action_statements(input_code, expected_output):
 ])
 def test_call_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output
+
+# Return statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("result\n", [('return_statement', [])]),
+    ("result 1\n", [('return_statement', [('integer_literal', 1)])]),
+    ("result 1 2\n", [('return_statement', [('integer_literal', 1), ('integer_literal', 2)])]),
+])
+def test_return_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Print statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("print\n", [('print_statement', [])]),
+    ("print 1\n", [('print_statement', [('integer_literal', 1)])]),
+    ("print 1 2\n", [('print_statement', [('integer_literal', 1), ('integer_literal', 2)])]),
+])
+def test_print_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Call assignement to variable
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("x is call y\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', []))]),
+    ("x is call y 1\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', [('integer_literal', 1)]))]),
+    ("x is call y 1 2\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', [('integer_literal', 1), ('integer_literal', 2)]))]),
+])
+def test_call_assignment_to_variable(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
