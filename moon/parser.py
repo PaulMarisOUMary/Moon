@@ -1,6 +1,6 @@
 import ply.yacc as yacc
 
-from moon import tokens, build_lexer
+from lexer import tokens, build_lexer
 
 precedence = (
 	('left', 'OR'),
@@ -38,7 +38,7 @@ def p_statement(p):
 
 # Variable Declaration
 def p_variable_declaration(p):
-	'variable_declaration : IDENTIFIER IS expression'
+	'''variable_declaration : IDENTIFIER IS expression'''
 	p[0] = ('variable_declaration', p[1], p[3])
 
 # Expression rules
@@ -90,7 +90,7 @@ def print_tokens(code):
 	lexer = build_lexer()
 	lexer.input(code)
 	print('----- Tokens -----')
-	for token in list(lexer):
+	for token in lexer:
 		print(token)
 	print('----- ERRORS -----')
 	for error in lexer.errors:
@@ -101,12 +101,18 @@ def print_tokens(code):
 
 # Main program
 def parse_code(code):
+	code += '\n'
 	lexer = build_lexer()
 	lexer.input(code)
 
 	print_tokens(code)
 
 	parser = yacc.yacc()
-	result = parser.parse(code, lexer=lexer)
+	result = parser.parse(code+'\n', lexer=lexer)
 
 	return result
+
+if __name__ == '__main__':
+	code = """variable is 1"""
+	result = parse_code(code)
+	print(result)
