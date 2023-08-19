@@ -7,7 +7,7 @@ def evaluate_expression(exp, environment):
 	elif type == "string_literal":
 		return str(args[0])
 	elif type == "boolean_literal":
-		return args[0] == "true"
+		return args[0]
 	elif type == "null_literal":
 		return None
 	elif type == "arithmetic_expression":
