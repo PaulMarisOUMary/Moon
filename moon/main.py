@@ -17,7 +17,7 @@ def main():
         print("Usage: python3 moon.py <filename> [-d]")
         exit(1)
 
-    with open(args.filename, "r") as f:
+    with open(args.filename, 'r', encoding="utf-8") as f:
         source_code = f.read()
 
     source_code = source_code.lstrip('\n')
