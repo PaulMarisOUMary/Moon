@@ -125,6 +125,7 @@ def p_expression(p):
 				  | arithmetic_expression
 				  | logical_expression
 				  | call_statement
+				  | ask_statement
 				  | IDENTIFIER"""
 	p[0] = p[1]
 
@@ -183,6 +184,10 @@ def p_optional_result(p):
 		p[0] = [p[1]] + p[2]
 	else:
 		p[0] = [p[1]]
+
+def p_ask_statement(p):
+	"""ask_statement : ASK string_literal"""
+	p[0] = ("ask_statement", p[2])
 
 def p_print_statement(p):
 	"""print_statement : PRINT optional_prints NEWLINE

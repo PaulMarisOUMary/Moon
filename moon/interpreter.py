@@ -39,9 +39,10 @@ def execute_statement(statement, environment, actions):
 	type, *args = statement
 	if type == "variable_declaration_statement":
 		var_name, value = args
-		# Check if value is a call_statement
-		if isinstance(value, tuple) and value[0] == "call_statement":
-			# Execute the call and assign the result to the variable
+		if isinstance(value, tuple) and value[0] == "ask_statement":
+			prompt = value[1][1]
+			value = input(prompt)
+		elif isinstance(value, tuple) and value[0] == "call_statement":
 			value = execute_statement(value, environment, actions)
 		else:
 			value = evaluate_expression(value, environment)
@@ -77,6 +78,10 @@ def execute_statement(statement, environment, actions):
 		expressions = args[0]
 		values = [evaluate_expression(exp, environment) if isinstance(exp, tuple) else environment[exp] for exp in expressions]
 		print(*values)
+	elif type == "ask_statement":
+		# Handle standalone ask statement
+		prompt = args[0][1] # Extract the prompt string
+		input(prompt)
 
 def execute_statements(statements, environment, actions):
 	for statement in statements:
