@@ -127,7 +127,7 @@ def test_break_statements(input_code, expected_output):
 
 # Continue statements
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("continue\n", [('continue_statement',)]),
+    ("skip\n", [('continue_statement',)]),
 ])
 def test_continue_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output

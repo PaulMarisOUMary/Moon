@@ -135,6 +135,7 @@ def test_while_statements(input_code, expected_output, capsys):
 @pytest.mark.parametrize("input_code, expected_output", [
     ("x is 0\nwhile x < 5\n\tx is x + 1\n\tstop\nprint x", "1"),
     ("x is 0\nwhile true\n\tprint x\n\tx is x + 1\n\tif x > 5\n\t\tif x is 10\n\t\t\tstop", "0\n1\n2\n3\n4\n5\n6\n7\n8\n9"),
+    ("x is 0\nwhile true\n\tx is x + 1\n\tif x is 3\n\t\tskip\n\tprint x\n\n\tif x is 10\n\t\tstop", "1\n2\n4\n5\n6\n7\n8\n9\n10"),
 ])
 def test_break_statements(input_code, expected_output, capsys):
     code_to_output(input_code)

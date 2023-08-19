@@ -166,7 +166,7 @@ def p_break_statement(p):
 	p[0] = ("break_statement",)
 
 def p_continue_statement(p):
-	"""continue_statement : CONTINUE NEWLINE"""
+	"""continue_statement : SKIP NEWLINE"""
 	p[0] = ("continue_statement",)
 
 def p_result(p):

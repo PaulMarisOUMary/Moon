@@ -41,14 +41,28 @@ def execute_statement(statement, environment, actions):
 			result = execute_statements(suite, environment, actions)
 			if result == "stop":
 				return "stop"
+			elif result == "skip":
+				return "skip"
 	elif type == "while_statement":
 		condition, suite = args
 		while evaluate_expression(condition, environment):
-			result = execute_statements(suite, environment, actions)
+			skip = False
+			result = None
+			for inner_statement in suite:
+				result = execute_statement(inner_statement, environment, actions)
+				if result == "stop":
+					break
+				if result == "skip":
+					skip = True
+					break
 			if result == "stop":
 				break
+			if skip:
+				continue
 	elif type == "break_statement":
 		return "stop"
+	elif type == "continue_statement":
+		return "skip"
 	elif type == "action_statement":
 		name, params, suite = args
 		actions[name] = (params, suite)
@@ -85,6 +99,8 @@ def execute_statements(statements, environment, actions):
 		result = execute_statement(statement, environment, actions)
 		if result == "stop":
 			return "stop"
+		if result == "skip":
+			return "skip"
 		if statement[0] == "return_statement":
 			environment["return_value"] = result
 
