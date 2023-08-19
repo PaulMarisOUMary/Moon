@@ -13,6 +13,8 @@ def main():
     with open(filename, "r") as f:
         source_code = f.read()
 
+    source_code = source_code.lstrip('\n')
+
     lexer = build_lexer()
     lexer.input(source_code)
 
