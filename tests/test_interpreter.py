@@ -121,3 +121,24 @@ def test_if_statements(input_code, expected_output, capsys):
     captured = capsys.readouterr()
 
     assert captured.out.rstrip() == expected_output
+
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("x is 0\nwhile x < 5\n\tx is x + 1\nprint x", "5"),
+])
+def test_while_statements(input_code, expected_output, capsys):
+    code_to_output(input_code)
+
+    captured = capsys.readouterr()
+
+    assert captured.out.rstrip() == expected_output
+
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("x is 0\nwhile x < 5\n\tx is x + 1\n\tstop\nprint x", "1"),
+    ("x is 0\nwhile true\n\tprint x\n\tx is x + 1\n\tif x > 5\n\t\tif x is 10\n\t\t\tstop", "0\n1\n2\n3\n4\n5\n6\n7\n8\n9"),
+])
+def test_break_statements(input_code, expected_output, capsys):
+    code_to_output(input_code)
+
+    captured = capsys.readouterr()
+
+    assert captured.out.rstrip() == expected_output

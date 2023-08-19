@@ -38,11 +38,17 @@ def execute_statement(statement, environment, actions):
 	elif type == "if_statement":
 		condition, suite = args
 		if evaluate_expression(condition, environment):
-			execute_statements(suite, environment, actions)
+			result = execute_statements(suite, environment, actions)
+			if result == "stop":
+				return "stop"
 	elif type == "while_statement":
 		condition, suite = args
 		while evaluate_expression(condition, environment):
-			execute_statements(suite, environment, actions)
+			result = execute_statements(suite, environment, actions)
+			if result == "stop":
+				break
+	elif type == "break_statement":
+		return "stop"
 	elif type == "action_statement":
 		name, params, suite = args
 		actions[name] = (params, suite)
@@ -77,6 +83,8 @@ def handle_call_statement(args, environment, actions):
 def execute_statements(statements, environment, actions):
 	for statement in statements:
 		result = execute_statement(statement, environment, actions)
+		if result == "stop":
+			return "stop"
 		if statement[0] == "return_statement":
 			environment["return_value"] = result
 
