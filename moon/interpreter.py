@@ -76,7 +76,14 @@ def execute_statement(statement, environment, actions):
 		return values if len(values) != 1 else values[0]
 	elif type == "print_statement":
 		expressions = args[0]
-		values = [evaluate_expression(exp, environment) if isinstance(exp, tuple) else environment[exp] for exp in expressions]
+		values = []
+		for exp in expressions:
+			if isinstance(exp, tuple) and exp[0] == "call_statement":
+				value = execute_statement(exp, environment, actions)
+				values.append(value)
+			else:
+				value = evaluate_expression(exp, environment) if isinstance(exp, tuple) else environment[exp]
+				values.append(value)
 		print(*values)
 	elif type == "ask_statement":
 		# Handle standalone ask statement
