@@ -1,58 +1,62 @@
 import pytest
+
 from moon import build_lexer
 
 # Test valid tokens
-@pytest.mark.parametrize("input_str, expected_type", [
-	("+", "PLUS"),
-	("-", "MINUS"),
-	("*", "MULTIPLY"),
-	("/", "DIVIDE"),
-	("%", "MODULO"),
-	("**", "EXPONENT"),
-	("<", "LT"),
-	("<=", "LE"),
-	(">", "GT"),
-	(">=", "GE"),
-	("action", "ACTION"),
-	("and", "AND"),
-	("as", "AS"),
-	("assert", "ASSERT"),
-	("async", "ASYNC"),
-	("await", "AWAIT"),
-	("continue", "CONTINUE"),
-	#("default", "DEFAULT"),
-	("dict", "DICT"),
-	("elif", "ELIF"),
-	("else", "ELSE"),
-	("end", "END"),
-	("false", "BOOLEAN"),
-	("fail", "FAIL"),
-	("from", "FROM"),
-	("for", "FOR"),
-	("global", "GLOBAL"),
-	("has", "HAS"),
-	("if", "IF"),
-	("in", "IN"),
-	("is", "IS"),
-	("isnt", "ISNT"),
-	("lambda", "LAMBDA"),
-	("list", "LIST"),
-	("null", "NULL"),
-	("not", "NOT"),
-	("nothing", "NOTHING"),
-	("or", "OR"),
-	("pass", "PASS"),
-	("raise", "RAISE"),
-	("result", "RESULT"),
-	("test", "TEST"),
-	("thing", "THING"),
-	("true", "BOOLEAN"),
-	("use", "USE"),
-	("stop", "STOP"),
-	("while", "WHILE"),
-	("yield", "YIELD"),
+@pytest.mark.parametrize("input_str, expected_type, is_detected", [
+    ("+",        "PLUS",     '✅'),
+    ("-",        "MINUS",    '✅'),
+    ("*",        "MULTIPLY", '✅'),
+    ("/",        "DIVIDE",   '✅'),
+    ("%",        "MODULO",   '✅'),
+    ("**",       "EXPONENT", '✅'),
+    ("<",        "LT",       '✅'),
+    ("<=",       "LE",       '✅'),
+    (">",        "GT",       '✅'),
+    (">=",       "GE",       '✅'),
+    ("action",   "ACTION",   '✅'),
+    ("and",      "AND",      '✅'),
+    ("as",       "AS",       '✅'),
+    ("ask",      "ASK",      '✅'),
+    ("assert",   "ASSERT",   '❌'),
+    ("async",    "ASYNC",    '❌'),
+    ("await",    "AWAIT",    '❌'),
+    ("call",     "CALL",     '✅'),
+    ("continue", "CONTINUE", '✅'),
+    ("default",  "DEFAULT",  '❌'),
+    ("dict",     "DICT",     '✅'),
+    ("elif",     "ELIF",     '❌'),
+    ("else",     "ELSE",     '✅'),
+    ("end",      "END",      '❌'),
+    ("false",    "BOOLEAN",  '✅'),
+    ("fail",     "FAIL",     '✅'),
+    ("from",     "FROM",     '✅'),
+    ("for",      "FOR",      '❌'),
+    ("global",   "GLOBAL",   '❌'),
+    ("has",      "HAS",      '✅'),
+    ("if",       "IF",       '✅'),
+    ("in",       "IN",       '❌'),
+    ("is",       "IS",       '✅'),
+    ("isnt",     "ISNT",     '✅'),
+    ("lambda",   "LAMBDA",   '❌'),
+    ("list",     "LIST",     '✅'),
+    ("null",     "NULL",     '✅'),
+    ("not",      "NOT",      '✅'),
+    ("nothing",  "NOTHING",  '❌'),
+    ("or",       "OR",       '✅'),
+    ("pass",     "PASS",     '❌'),
+    ("print",    "PRINT",    '✅'),
+    ("raise",    "RAISE",    '✅'),
+    ("result",   "RESULT",   '✅'),
+    ("test",     "TEST",     '✅'),
+    ("thing",    "THING",    '✅'),
+    ("true",     "BOOLEAN",  '✅'),
+    ("use",      "USE",      '✅'),
+    ("stop",     "STOP",     '✅'),
+    ("while",    "WHILE",    '✅'),
+    ("yield",    "YIELD",    '❌'),
 ])
-def test_valid_tokens(input_str, expected_type):
+def test_valid_tokens(input_str, expected_type, is_detected):
 	# Arrange
 	lexer = build_lexer()
 
@@ -61,9 +65,14 @@ def test_valid_tokens(input_str, expected_type):
 	tokens = list(lexer)
 
 	# Assert
-	assert len(tokens) == 1
-	assert tokens[0].type == expected_type
-	assert len(lexer.errors) == 0
+	if is_detected == '✅':
+		assert tokens[0].type == expected_type
+		assert len(lexer.errors) == 0
+	else:
+		assert len(tokens) == 1
+		assert tokens[0].type != expected_type
+		assert tokens[0].type == "IDENTIFIER"
+		assert len(lexer.errors) == 0
 
 # Test invalid identifiers named as keywords
 @pytest.mark.parametrize("invalid_identifier", [

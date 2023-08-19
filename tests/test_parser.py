@@ -1,14 +1,22 @@
 import pytest
 
-from moon import parse_code
+from moon.lexer import build_lexer
+from moon.parser import build_parser
+
+def parse_code(code):
+    lexer = build_lexer()
+    lexer.input(code)
+
+    parser = build_parser()
+    return parser.parse(code+'\n', lexer=lexer)
 
 # Literals
 @pytest.mark.parametrize("input_code, expected_output", [
     ("1", [('integer_literal', 1)]),
     ("1.0", [('float_literal', 1.0)]),
     ("\"Hello World\"", [('string_literal', "Hello World")]),
-    ("true", [('boolean_literal', 'true')]),
-    ("false", [('boolean_literal', 'false')]),
+    ("true", [('boolean_literal', True)]),
+    ("false", [('boolean_literal', False)]),
     ("null", [('null_literal', 'null')]),
 ])
 def test_literals(input_code, expected_output):
@@ -43,9 +51,9 @@ def test_comparison_expressions(input_code, expected_output):
 
 # Logical expressions
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("true and true", [('logical_expression', 'and', ('boolean_literal', 'true'), ('boolean_literal', 'true'))]),
-    ("true or true", [('logical_expression', 'or', ('boolean_literal', 'true'), ('boolean_literal', 'true'))]),
-    ("not true", [('logical_expression', 'not', ('boolean_literal', 'true'))]),
+    ("true and true", [('logical_expression', 'and', ('boolean_literal', True), ('boolean_literal', True))]),
+    ("true or true", [('logical_expression', 'or', ('boolean_literal', True), ('boolean_literal', True))]),
+    ("not true", [('logical_expression', 'not', ('boolean_literal', True))]),
 ])
 def test_logical_expressions(input_code, expected_output):
     assert parse_code(input_code) == expected_output
@@ -67,19 +75,19 @@ def test_variable_declaration_statements(input_code, expected_output):
 
 # If statements
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\t1", [('if_statement', ('boolean_literal', 'true'), [('integer_literal', 1)])]),
+    ("if true\n\t1", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)])]),
     ("if true\n\tif false\n\t\t1", [
-        ('if_statement', ('boolean_literal', 'true'), [
-            ('if_statement', ('boolean_literal', 'false'), [
+        ('if_statement', ('boolean_literal', True), [
+            ('if_statement', ('boolean_literal', False), [
                 ('integer_literal', 1)
             ])
         ])
     ]),
     ("if true\n\tif false\n\t\tvariable is 3\n\t\tif true\n\t\t\tvariable is 5\n\t\tvariable is 6", [
-        ('if_statement', ('boolean_literal', 'true'), [
-            ('if_statement', ('boolean_literal', 'false'), [
+        ('if_statement', ('boolean_literal', True), [
+            ('if_statement', ('boolean_literal', False), [
                 ('variable_declaration_statement', 'variable', ('integer_literal', 3)),
-                ('if_statement', ('boolean_literal', 'true'), [
+                ('if_statement', ('boolean_literal', True), [
                     ('variable_declaration_statement', 'variable', ('integer_literal', 5))
                 ]),
                 ('variable_declaration_statement', 'variable', ('integer_literal', 6))
@@ -92,14 +100,14 @@ def test_if_statements(input_code, expected_output):
 
 # While statements
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("while true\n\t1", [('while_statement', ('boolean_literal', 'true'), [('integer_literal', 1)])]),
+    ("while true\n\t1", [('while_statement', ('boolean_literal', True), [('integer_literal', 1)])]),
     ("while true\n\t1\nwhile false or true\n\t2\n\twhile true\n\t\twhile true\n\t\t\t3\n\t4", [
-	('while_statement', ('boolean_literal', 'true'), [
+	('while_statement', ('boolean_literal', True), [
 		('integer_literal', 1)]), 
-	('while_statement', ('logical_expression', 'or', ('boolean_literal', 'false'), ('boolean_literal', 'true')), [
+	('while_statement', ('logical_expression', 'or', ('boolean_literal', False), ('boolean_literal', True)), [
 		('integer_literal', 2), 
-		('while_statement', ('boolean_literal', 'true'), [
-			('while_statement', ('boolean_literal', 'true'), [
+		('while_statement', ('boolean_literal', True), [
+			('while_statement', ('boolean_literal', True), [
 				('integer_literal', 3)
 				])
 			]), 
