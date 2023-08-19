@@ -12,8 +12,8 @@ def evaluate_expression(exp, environment):
 		return None
 	elif type == "arithmetic_expression":
 		operator, left, right = args
-		left_val = evaluate_expression(left, environment)
-		right_val = evaluate_expression(right, environment)
+		left_val = evaluate_expression(left, environment) if isinstance(left, tuple) else environment[left]
+		right_val = evaluate_expression(right, environment) if isinstance(right, tuple) else environment[right]
 		return eval(f"{left_val} {operator} {right_val}")
 	elif type == "comparison_expression":
 		operator, left, right = args

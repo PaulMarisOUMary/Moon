@@ -135,6 +135,10 @@ def p_comparison_expression(p):
 							 | expression ISNT expression
 							 | expression GT expression
 							 | expression GE expression"""
+	if p[2] == "is":
+		p[2] = "=="
+	elif p[2] == "isnt":
+		p[2] = "!="
 	p[0] = ("comparison_expression", p[2], p[1], p[3])
 
 def p_arithmetic_expression(p):

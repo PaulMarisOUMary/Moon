@@ -43,8 +43,8 @@ def test_arithmetic_expressions(input_code, expected_output):
     ("1 <= 1", [('comparison_expression', '<=', ('integer_literal', 1), ('integer_literal', 1))]),
     ("1 > 1", [('comparison_expression', '>', ('integer_literal', 1), ('integer_literal', 1))]),
     ("1 >= 1", [('comparison_expression', '>=', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 is 1", [('comparison_expression', 'is', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 isnt 1", [('comparison_expression', 'isnt', ('integer_literal', 1), ('integer_literal', 1))]),
+    ("1 is 1", [('comparison_expression', '==', ('integer_literal', 1), ('integer_literal', 1))]),
+    ("1 isnt 1", [('comparison_expression', '!=', ('integer_literal', 1), ('integer_literal', 1))]),
 ])
 def test_comparison_expressions(input_code, expected_output):
     assert parse_code(input_code) == expected_output
