@@ -211,7 +211,7 @@ def p_empty(p):
 
 def p_error(p):
 	if p:
-		print("Syntax error at '%s'" % p.value)
+		pass # lexer already handle this kind of error
 	else:
 		print("Syntax error at EOF")
 

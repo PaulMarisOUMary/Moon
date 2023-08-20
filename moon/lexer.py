@@ -128,7 +128,7 @@ def t_NEWLINE(t):
 
 # Error handling
 def t_error(t):
-	print(f"Illegal character '{t.value[0]}'")
+	print(f"Error: '{str(t.value).strip()}' at line {t.lineno}:{t.lexpos}")
 	t.lexer.errors.append([t.value[0], t.lexer.lineno, t.lexer.lexpos])
 	t.lexer.skip(1)
 
@@ -155,9 +155,13 @@ class IndentLexer(object):
 	def _indentation_filter(self, tokens):
 		current_indentation = 0
 		indentation_count = 0
+		is_first_token = True
 
 		for token in tokens:
 			if token.type == "NEWLINE":
+				if is_first_token:  # Skip the first newline
+					continue
+
 				indentation_count = 0
 
 				yield token
@@ -180,6 +184,8 @@ class IndentLexer(object):
 					yield next_token
 			else:
 				yield token
+
+			is_first_token = False
 
 		for i in range(current_indentation):
 			yield self._new_token("DEDENT", (current_indentation-i)*'\t', token.lineno if token else 0) # type: ignore
