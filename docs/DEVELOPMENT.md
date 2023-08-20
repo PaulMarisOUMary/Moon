@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- [Python3](https://www.python.org/downloads/)
-- pip3
+- [Python 3](https://www.python.org/downloads/) (tested with Python 3.11.x)
+- [pip](https://pip.pypa.io/en/stable/installation/) (tested with pip 23.2.x)
 
 ## Setup
 
@@ -16,14 +16,12 @@ pip3 install -r requirements.txt
 
 ```bash
 # Install library
-pip3 install -U .
+make build
 ```
 
 ## Run tests
 
 ```bash
 # Run tests
-pytest
+make tests
 ```
-
-You can also use Visual Studio Code to run the tests in the Testing tab.

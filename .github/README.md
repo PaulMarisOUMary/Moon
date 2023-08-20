@@ -1,83 +1,87 @@
-# MOONSHOT
+# MOON
 
-## Functional Specification for the Natural Disaster Prevention Application
+This README provides essential information including technical specs, functional specs, examples, and other related documentation.
 
-### Objective
+## About
 
-The objective of this application is to provide real-time information about disasters to inform and prevent potential risks.
+Moon is a programming language project designed to provide an intuitive and human-readable syntax.
+The language is meant to be easily accessible to new programmers while offering flexibility and expressiveness for more experienced users.
 
-### Features
+The language is still under development.
 
-The application should include the following features:
+Moon support indentation-based syntax, similar to languages like Python. This allows a clean and uncluttered code structure, emphasizing readability.
 
-- A real-time notifications/alerts about disasters based on their selected preferences and geographical location.
-- Alerts should include the type of disaster, location, severity level, and if possible recommandation.
-- Users should have the option to report disasters or potential risks they encounter.
+The project includes a lexer, a parser and an ast (abstract syntax tree), to translate the Moon language into a form that can be executed or further analyzed. 
 
-Additional features:
+Moon's syntax includes standard programming constructs like variables, expressions, and control structures, as well as some unique elements tailored to the language's design goals.
 
-- An interactive map to allow users to view risk zones with if available statistics.
-- A section with usefull documentation about how to prepare for disasters and reduce risks to safety.
+Whether you're learning programming for the first time or looking for a fresh approach to coding, Moon aims to provide a simple yet powerful tool for writing and understanding code.
 
-### Technical Features
+## Table of Contents
 
-The application should use the following technologies to provide its features:
+1. [About](#about)
+2. [Functional Specifications](#functional-specifications)
+3. [Technical Specifications](#technical-specifications)
+4. [Examples](#examples)
+5. [Installation Guide](#installation-guide)
+6. [Contributing](#contributing)
+7. [License](#license)
+8. [Support and Contact](#support-and-contact)
 
-Monitoring various sources to gather real-time information about disasters.
-Data analysis algorithms to detect patterns and trends in the data.
-Cloud services to store and process data.
-Real-time notifications to alert users of potential disasters.
-Interactive maps based on geographical data.
+## Functional Specifications
 
-### User Interfaces
+Find the functional specifications at [Functional Specifications URL](/docs/SPEC_FUNC.md)
 
-The application should have the following user interfaces:
+## Technical Specifications
 
-A home page with general information about the application and the latest disasters worldwide.
-An interactive map to allow users to view risk zones.
-A user profile page to allow users to manage their notifications and preferences.
-Real-time notifications to alert users of potential disasters.
+Detailed technical specifications are available at [Technical Specifications URL](/docs/SPEC_TECH.md)
 
-### Constraints
+## Examples
 
-The application must be capable of running on mobile devices such as smartphones and tablets.
-The application must be able to process data in real-time to provide real-time notifications and interactive maps.
-The application must be secure and respect users' privacy by protecting their personal data.
+Examples illustrating how the programming language works under the [Examples Folder](/examples/) of this repository.
 
-### Conclusion
+- [Guessing Game](/examples/guess_game.moon)
 
-This application could potentially save lives by providing real-time information. By using technologies and different sources the application could provide real-time notifications and interactive maps to notify and help users in a disaster.
+## Installation Guide
 
-## Technical Specification for the Natural Disaster Prevention Application
+### Prerequisites
 
-### Architecture
+- [Python 3](https://www.python.org/downloads/) (tested with Python 3.11.x)
+- [pip](https://pip.pypa.io/en/stable/installation/) (tested with pip 23.2.x)
 
-The application will be based on a client-server architecture. The client will run on mobile devices such as smartphones and tablets, while the server will run in the cloud.
+### Installation
 
-The client will be responsible for displaying the user interface and sending user data and requests to the server. The server will be responsible for processing the data and requests received from the client and sending back the appropriate response.
+1. Clone this repository
+2. Install the required dependencies using `pip install -r requirements.txt`
+3. Install the library using `make build`
+4. Run the project using `python -m moon $filepath`
 
-The server will consist of several components, including:
+## Documentation
 
-Data acquisition system: responsible for collecting data from different sources.
-Data processing system: responsible for processing the data collected by the data acquisition system to detect patterns and trends that could indicate a potential disaster.
-Notification system: responsible for sending real-time notifications to users based on the data processed by the data processing system.
-Mapping system: responsible for generating interactive maps based on geographical data.
+Documentation is accessible at [API Documentation URL](/docs/) feel free to browse it !
 
-### Technologies
+All documenation about syntax, usage, semantics, and features are available at [Documentation URL](/docs/SYNTAX_SEMANTICS.md)
 
-The following technologies will be used to implement the application:
+## Contributing & Development
 
-Mobile development frameworks such as React Native or Flutter for the client.
-Cloud services such as Google Cloud Platform or Microsoft Azure for the server.
-Real-time data processing technologies such as Apache Kafka or RabbitMQ for the data acquisition and processing systems.
-Machine learning frameworks such as TensorFlow for the data processing system.
-Geographical data visualization technologies such as Mapbox or Google Maps for the mapping system.
+Interested in contributing to this project? Check out the guidelines at [Contributing Guide URL](/.github/CONTRIBUTING.md)
 
-### Data Sources
+More about the development of this project can be found at [Development Guide URL](/docs/DEVELOPMENT.md)
 
-Users will be able to report disasters or potential risks they encounter.
-The application will also monitor various sources to gather real-time information about disasters.
+## License
 
-### Security and Privacy
+This project is licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License (CC BY-NC-SA 4.0)].
+Full text can be found [here: LICENSE](/LICENSE)
 
-The application will comply with all relevant data protection regulations, such as the General Data Protection Regulation (GDPR) in the European Union.
+## Support and Contact
+
+For support and inquiries, please feel free to open an issue on GitHub or use the GitHub Discussions feature.
+Your feedback and questions are greatly appreciated and will help improve this project !
+
+- [Open an Issue](https://github.com/PaulMarisOUMary/MOONSHOT/issues)
+- [Join the Discussion](https://github.com/PaulMarisOUMary/MOONSHOT/discussions)
+
+---
+
+Thank you for using or contributing to this project.
+Follow our updates by leaving a star to this repository !
