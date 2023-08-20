@@ -30,17 +30,17 @@ Whether you're learning programming for the first time or looking for a fresh ap
 
 ## Functional Specifications
 
-Find the functional specifications at [Functional Specifications URL](/docs/SPEC_FUNC.md)
+Find the functional specifications: [Functional Specifications](/docs/SPEC_FUNC.md)
 
 ## Technical Specifications
 
-Detailed technical specifications are available at [Technical Specifications URL](/docs/SPEC_TECH.md)
+Detailed technical specifications are available: [Technical Specifications](/docs/SPEC_TECH.md)
 
 ## Examples
 
 Examples illustrating how the programming language works under the [Examples Folder](/examples/) of this repository.
 
-- [Guessing Game](/examples/guess_game.moon)
+- [Guessing Game](/examples/guess_game.mn)
 
 ## Installation Guide
 
@@ -58,9 +58,9 @@ Examples illustrating how the programming language works under the [Examples Fol
 
 ## Documentation
 
-Documentation is accessible at [API Documentation URL](/docs/) feel free to browse it !
+Documentation is accessible at [Documentation](/docs/) feel free to browse it !
 
-All documenation about syntax, usage, semantics, and features are available at [Documentation URL](/docs/SYNTAX_SEMANTICS.md)
+All documenation about syntax, usage, semantics, and features are available at [Syntax and Semantics](/docs/SYNTAX_SEMANTICS.md)
 
 ## Contributing & Development
 
