@@ -20,42 +20,63 @@ If you are reading this, you are encouraged to refer to the Functional Specifica
 
 ### Architecture diagram
 
-The architecture of this project can be depicted in a diagram that visually represents the core components and their interactions. The main components include the Core Engine, Interpreter, and Libraries & APIs. Here's a representation:
+The architecture of this project can be depicted in a diagram that visually represents the core components and their interactions.
+The main components include the Core Engine, which itself is composed of the Interpreter, Parser, and Lexer.
 ```
 +-----------------+
 |    User Code    |
 +-----------------+
         |
         v
-+-----------------+    +-----------------+    +-------------------+
-|   Interpreter   |<-->|    Core Engine  |<-->| Libraries & APIs  |
-+-----------------+    +-----------------+    +-------------------+
++-----------------+     +-----------------+
+|   Entry Point   | --> |   Core Engine   |
++-----------------+     +-----------------+
+                                |
+                                v
+                        +-----------------+
+                        |      Lexer      |
+                        +-----------------+
+                                |
+                                v
++-----------------+     +-----------------+
+|   Interpreter   | <-- |      Parser     |
++-----------------+     +-----------------+
+        |
+        v
++-----------------+
+|   User output   |
++-----------------+
 ```
+
+Entry point: The entry point is the starting point of the program. In our case it is where the file containing the user code is read and passed to the Core Engine.
+
+Core Engine: The Core Engine is the heart of the language, responsible for managing the execution flow.
+
+Lexer: The Lexer is responsible for reading the user code and converting it into a stream of tokens.
+
+Parser: The Parser is responsible for reading the stream of tokens and converting it into an Abstract Syntax Tree (AST).
+
+Interpreter: The Interpreter is responsible for reading the AST and executing the code.
+
+User output: The user output is the result of the execution of the user code.
 
 ### Main components
 
 #### Core engine
 
-The Core Engine is the heart of the language, responsible for managing the execution flow, handling syntax parsing, and controlling the overall operation. It defines the rules and semantics of the language and integrates with the Interpreter and Libraries & APIs to provide a seamless coding experience.
+The Core Engine is the heart of the language, responsible for managing the execution flow. It consists of the Lexer, Parser, and Interpreter, which work together to read, analyse, parse, and execute the user code.
+
+#### Lexer
+
+The Lexer is responsible for reading the user code and converting it into a stream of tokens. It performs lexical analysis, which involves breaking down the code into its smallest meaningful units, called tokens. These tokens are then passed to the Parser for further processing.
+
+#### Parser
+
+The Parser is responsible for reading the stream of tokens and converting it into an Abstract Syntax Tree (AST). It performs syntactic analysis, which involves analyzing the structure of the code and ensuring that it conforms to the language's syntax rules. The resulting AST is then passed to the Interpreter for execution.
 
 #### Interpreter
 
-The Interpreter serves as the bridge between the user-written code and the underlying Core Engine. It reads the code, translates it into an intermediate form, and sends it to the Core Engine for execution. The Interpreter also handles real-time error checking and provides feedback to the user, making development more interactive and user-friendly.
-
-#### Libraries and APIs
-
-Libraries & APIs offer a wide array of pre-defined functions, modules, and tools that extend the functionality of the language. This includes built-in modules like list, dict, etc.., as well as interfaces to integrate external libraries or systems. They enable developers to perform complex tasks without having to write extensive code, promoting reusability and efficiency.
-
-### Interaction between components
-
-The interaction between these components is carefully orchestrated to provide a coherent and efficient execution process:
-
-- User Code to Interpreter: The code written by the user is fed into the Interpreter, where it is parsed and translated.
-- Interpreter to Core Engine: The Interpreter sends the translated code to the Core Engine, where it is executed according to the language's semantics and rules.
-- Core Engine to Libraries & APIs: The Core Engine interacts with the Libraries & APIs to call any required built-in functions or modules, facilitating the completion of various tasks.
-- Two-way Interactions: The arrows in the diagram represent two-way interactions, meaning that each component can communicate with the other. For example, the Core Engine may request specific functions from the Libraries & APIs and receive data in return.
-
-This architectural design ensures that each component has a specific role and collaborates effectively with the others, leading to a smooth and responsive programming experience.
+This is the component that executes the code. It reads the AST and executes the code according to the language's semantics and rules. It interacts with the Core Engine to call any required built-in functions or modules, facilitating the completion of various tasks.
 
 ## Language Syntax and Semantics
 
