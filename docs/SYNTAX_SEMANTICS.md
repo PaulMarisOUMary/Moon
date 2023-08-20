@@ -131,7 +131,7 @@ false
 
 #### Null Literal
 
-<!-- ! TODO "nothing" ? -->
+<!-- ? NOTE: in the future we might support nothing keyword as null ? -->
 Null literal is used to represent the absence of a value.
 Example:
 ```
@@ -153,12 +153,14 @@ The emoji ❌ means that the keyword is not used for now in the language (but st
 | assert    | ❌  |
 | async     | ❌  |
 | await     | ❌  |
+| call      | ✅  |
 | continue  | ✅  |
 | default   | ❌  |
 | dict      | ✅  |
 | elif      | ❌  |
 | else      | ❌  |
 | end       | ❌  |
+| error     | ❌  |
 | false     | ✅  |
 | fail      | ✅  |
 | from      | ✅  |
@@ -182,6 +184,7 @@ The emoji ❌ means that the keyword is not used for now in the language (but st
 | thing     | ✅  |
 | true      | ✅  |
 | use       | ✅  |
+| skip      | ✅  |
 | stop      | ✅  |
 | while     | ✅  |
 | yield     | ❌  |
@@ -192,11 +195,16 @@ The emoji ❌ means that the keyword is not used for now in the language (but st
 
 #### Primitive Types
 
-- Integer: `count is 5`
-- Floating-point: `pi is 3.14`
-- String: `name is "Alice"`
-- Boolean: `fact is true` or `lie is false`
-- Null: `empty is null`
+- Integer `14` 
+(e.g.) `count is 5`
+- Floating-point `11.1`
+(e.g.) `pi is 3.14`
+- String `"Hello, World!"`
+(e.g.) `name is "Alice"`
+- Boolean `true` or `false`
+(e.g.) `fact is true` or `lie is false`
+- Null `null`
+(e.g.) `empty is null`
 
 #### Composite Types
 
@@ -211,7 +219,7 @@ mylist is list
 ```
 mydict is dict
     "name" is "Alex"
-    -85 is 85
+    85 is 85
 ```
 
 ### Variables
@@ -267,7 +275,6 @@ The following logical operators are supported:
 | `and`    | Logical And | `true and false` |
 | `or`     | Logical Or  | `true or false`  |
 | `not`    | Logical Not | `not true`       | 
-<!-- ! TODO -->
 
 #### Relational Expressions
 
@@ -316,7 +323,7 @@ Looping structures are used to execute a block of code repeatedly. In our langua
 - While loops (`while`)
 
 The following looping keywords are supported:
-- `continue`: Used to skip the current iteration of the loop and move on to the next one.
+- `skip`: Used to skip the current iteration of the loop and move on to the next one.
 - `stop`: Used to exit the loop from executing any further.
 
 Example:
@@ -337,7 +344,7 @@ The `error` keyword is used to throw manualy an error.
 Example:
 ```
 test
-    error "Something went wrong"
+    raise "Something went wrong"
 fail
     print "An error occurred"
 ```
@@ -352,14 +359,14 @@ Functions are used to group a set of statements together and execute them on cal
 Return values are optional. If a function does not return a value, it is said to return `null`.
 The `result` keyword is used to return a value from a function.
 
-To call a function, you just need to use its name followed by the arguments if any.
+To call a function, you just need to use the `call` keyword followed by the name of the function and if needed the parameters.
 
 Example:
 ```
 action addNumbers a b
     result a + b
 
-sum is addNumbers 1 2
+sum is call addNumbers 1 2
 print sum
 # Output: 3
 ```
@@ -522,7 +529,10 @@ In our language, we separate tokens using a space (only if the token is followed
 ### Execution Model
 
 The execution model of the language is based on the following steps:
-<!-- ! TODO -->
+
+1. Lexical Analysis: The source code is converted into a sequence of tokens.
+2. Syntax Analysis: The sequence of tokens is converted into an abstract syntax tree (AST).
+3. Interpretation: The AST is traversed and executed.
 
 ### Type System
 
@@ -583,8 +593,22 @@ In the current stage, there is no standard modules.
 
 ## Examples
 
-<!-- ! TODO -->
+Feel free to check out the [examples](/examples/) folder for some sample programs written in Moon.
 
 ## References
 
-<!-- ! TODO -->
+- [Python](https://www.python.org/)
+
+## Glossary
+
+- **Action**: A function.
+- **Class**: A blueprint for creating objects.
+- **Function**: A block of code that performs a specific task.
+- **Identifier**: A name used to identify a variable, function, class, or other entity within the program.
+- **Literal**: A fixed value within the program.
+- **Module**: A file containing a set of functions and classes.
+- **Operator**: A symbol that represents a specific operation.
+- **Scope**: The area of code where a variable is accessible.
+- **Thing**: A class.
+- **Token**: The smallest element of a program that is meaningful to the compiler or interpreter.
+- **Variable**: A container used to store values within the program.
