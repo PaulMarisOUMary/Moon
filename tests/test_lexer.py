@@ -166,6 +166,11 @@ def test_valid_and_invalid_null(input_str, is_valid):
 	('"string with \\n new line"', True),
 	('"unterminated string', False),
 	('"string with unmatched \\"', False),
+	("'string here'", True),
+	("'string with \\'escape\\' characters'", True),
+	("'string with \\n new line'", True),
+	("'unterminated string", False),
+	("'string with unmatched \\'", False),
 ])
 def test_valid_and_invalid_string(input_str, is_valid):
 	# Arrange

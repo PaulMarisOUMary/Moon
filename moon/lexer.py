@@ -100,7 +100,7 @@ def t_INTEGER(t):
 
 # String literal rule
 def t_STRING(t):
-	r'"(\\.|[^"\\])*"'
+	r'"(\\.|[^"\\])*"|\'(\\.|[^\'\\])*\''
 	t.value = t.value[1:-1]  # Remove the quotes
 	return t
 
