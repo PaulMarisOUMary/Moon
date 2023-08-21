@@ -36,13 +36,15 @@ def execute_statement(statement, environment, actions):
 		var_name, value = args
 		environment[var_name] = handle_variable_declaration(value, environment, actions)
 	elif type == "if_statement":
-		condition, suite = args
+		condition, suite, else_suite = args
 		if evaluate_expression(condition, environment):
 			result = execute_statements(suite, environment, actions)
 			if result == "stop":
 				return "stop"
 			elif result == "skip":
 				return "skip"
+		elif else_suite:
+			return execute_statements(else_suite, environment, actions)
 	elif type == "while_statement":
 		condition, suite = args
 		while evaluate_expression(condition, environment):

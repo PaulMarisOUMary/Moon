@@ -75,27 +75,43 @@ def test_variable_declaration_statements(input_code, expected_output):
 
 # If statements
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\t1", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)])]),
+    ("if true\n\t1", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)], None)]),
     ("if true\n\tif false\n\t\t1", [
         ('if_statement', ('boolean_literal', True), [
             ('if_statement', ('boolean_literal', False), [
                 ('integer_literal', 1)
-            ])
-        ])
+            ], None)
+        ], None)
     ]),
-    ("if true\n\tif false\n\t\tvariable is 3\n\t\tif true\n\t\t\tvariable is 5\n\t\tvariable is 6", [
+    ("if true\n\tif false\n\t\tvariable is 3\n\t\tif true\n\t\t\tvariable is 5\n\t\tvariable is 6", 
+        [('if_statement', ('boolean_literal', True),
+            [('if_statement', ('boolean_literal', False), 
+                [('variable_declaration_statement', 'variable', ('integer_literal', 3)),
+                ('if_statement', ('boolean_literal', True),
+                [('variable_declaration_statement', 'variable', ('integer_literal', 5))], None),
+                ('variable_declaration_statement', 'variable', ('integer_literal', 6))], None)],
+            None)]
+    ),
+])
+def test_if_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# If else statements
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("if true\n\t1\nelse\n\t2", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)], [('integer_literal', 2)])]),
+    ("if true\n\t1\nelse\n\tif false\n\t\t2\n\telse\n\t\t3", [
         ('if_statement', ('boolean_literal', True), [
+            ('integer_literal', 1)
+        ], [
             ('if_statement', ('boolean_literal', False), [
-                ('variable_declaration_statement', 'variable', ('integer_literal', 3)),
-                ('if_statement', ('boolean_literal', True), [
-                    ('variable_declaration_statement', 'variable', ('integer_literal', 5))
-                ]),
-                ('variable_declaration_statement', 'variable', ('integer_literal', 6))
+                ('integer_literal', 2)
+            ], [
+                ('integer_literal', 3)
             ])
         ])
     ]),
 ])
-def test_if_statements(input_code, expected_output):
+def test_if_else_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 
 # While statements

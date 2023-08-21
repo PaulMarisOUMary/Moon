@@ -39,8 +39,16 @@ def p_statement(p):
 	p[0] = p[1]
 
 def p_if_statement(p):
-	"""if_statement : IF conditional_test suite"""
-	p[0] = ("if_statement", p[2], p[3])
+	"""if_statement : IF conditional_test suite optional_else"""
+	p[0] = ("if_statement", p[2], p[3], (p[4] if len(p) == 5 else None))
+
+def p_optional_else(p):
+	"""optional_else : ELSE suite
+					 | empty"""
+	if len(p) == 3:
+		p[0] = p[2]
+	else:
+		p[0] = None
 
 def p_while_statement(p):
 	"""while_statement : WHILE conditional_test suite"""
