@@ -106,7 +106,8 @@ def t_STRING(t):
 
 # Comment rule for single-line comments
 def t_COMMENT(t):
-	r"\#[^\n]*"
+	r"\#[^\n]*(\n)*"
+	t.lexer.lineno += t.value.count('\n')
 	# No return value. Token discarded
 
 # Comment rule for multi-line comments
