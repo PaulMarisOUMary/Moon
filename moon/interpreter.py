@@ -98,14 +98,15 @@ def handle_variable_declaration(value, environment, actions):
     return evaluate_expression(value, environment)
 
 def handle_call_statement(args, environment, actions):
-	name, params = args
-	param_values = [evaluate_expression(p, environment) for p in params]
-	if name in actions:
-		func_params, func_body = actions[name]
-		local_env = dict(zip(func_params, param_values))
-		execute_statements(func_body, local_env, actions)
-		environment.update({k: v for k, v in local_env.items() if k in environment})
-		return local_env.get("return_value", None)
+    name, params = args
+    param_values = [evaluate_expression(p, environment) for p in params]
+    if name in actions:
+        func_params, func_body = actions[name]
+        local_env = environment.copy()
+        local_env.update(dict(zip(func_params, param_values)))
+        execute_statements(func_body, local_env, actions)
+        environment.update({k: v for k, v in local_env.items() if k in environment and v != environment.get(k)})
+        return local_env.get("return_value", None)
 
 def execute_statements(statements, environment, actions):
 	for statement in statements:
