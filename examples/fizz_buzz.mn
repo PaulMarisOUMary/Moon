@@ -1,0 +1,19 @@
+(
+	FizzBuzz
+	Print "Fizz" for multiples of 3,
+	"Buzz" for multiples of 5, and
+	"FizzBuzz" for multiples of both 3 and 5.
+	All other numbers are printed as they are.
+)
+
+x is 1
+while x <= 100
+	out is ''
+
+	if x % 3 is 0
+		out is out + "Fizz"
+	if x % 5 is 0
+		out is out + "Buzz"
+
+	print out or x
+	x is x + 1
