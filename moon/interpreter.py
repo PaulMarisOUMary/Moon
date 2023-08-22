@@ -16,7 +16,7 @@ def evaluate_expression(exp, environment):
 		operator, left, right = args
 		left_val = evaluate_or_get_value(left, environment)
 		right_val = evaluate_or_get_value(right, environment)
-		return eval(f"{left_val} {operator} {right_val}")
+		return eval(f"{repr(left_val)} {operator} {repr(right_val)}")
 	elif type == "variable_declaration_statement":
 		var_name, expression = args
 		value = evaluate_expression(expression, environment)
@@ -79,12 +79,14 @@ def execute_statement(statement, environment, actions):
 		input(args[0][1])
 
 def handle_variable_declaration(value, environment, actions):
-	if isinstance(value, tuple):
-		if value[0] == "ask_statement":
-			return input(value[1][1])
-		if value[0] == "call_statement":
-			return execute_statement(value, environment, actions)
-	return evaluate_expression(value, environment)
+    if isinstance(value, str):
+        return environment[value]
+    elif isinstance(value, tuple):
+        if value[0] == "ask_statement":
+            return input(value[1][1])
+        if value[0] == "call_statement":
+            return execute_statement(value, environment, actions)
+    return evaluate_expression(value, environment)
 
 def handle_call_statement(args, environment, actions):
 	name, params = args
