@@ -78,12 +78,21 @@ def execute_statement(statement, environment, actions):
 	elif type == "ask_statement":
 		input(args[0][1])
 
+def auto_cast(value):
+	try:
+		return int(value)
+	except ValueError:
+		try:
+			return float(value.replace(",", "."))
+		except ValueError:
+			return value
+
 def handle_variable_declaration(value, environment, actions):
     if isinstance(value, str):
         return environment[value]
     elif isinstance(value, tuple):
         if value[0] == "ask_statement":
-            return input(value[1][1])
+            return auto_cast(input(value[1][1]))
         if value[0] == "call_statement":
             return execute_statement(value, environment, actions)
     return evaluate_expression(value, environment)
