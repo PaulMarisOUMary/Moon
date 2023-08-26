@@ -1,4 +1,5 @@
 import argparse
+import re
 
 from pprint import pprint
 
@@ -21,6 +22,12 @@ def main():
         source_code = f.read()
 
     source_code = source_code.lstrip('\n')
+    source_code = re.sub(
+        pattern=r"^(\s{4})+",
+        repl=lambda m: '\t' * (len(m.group(0)) // 4),
+        string=source_code,
+        flags=re.MULTILINE
+    )
 
     lexer = build_lexer()
     lexer.input(source_code)
