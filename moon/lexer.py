@@ -157,6 +157,7 @@ class IndentLexer(object):
 		current_indentation = 0
 		indentation_count = 0
 		is_first_token = True
+		token = None
 
 		for token in tokens:
 			if token.type == "NEWLINE":
@@ -189,7 +190,7 @@ class IndentLexer(object):
 			is_first_token = False
 
 		for i in range(current_indentation):
-			yield self._new_token("DEDENT", (current_indentation-i)*'\t', token.lineno if token else 0) # type: ignore
+			yield self._new_token("DEDENT", (current_indentation-i)*'\t', token.lineno if token else 0)
 
 	def _indent_tokens(self, lexer):
 		token = None
