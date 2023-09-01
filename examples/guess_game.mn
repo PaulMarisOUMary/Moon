@@ -22,7 +22,7 @@ while true
 
 	stop
 
-print "Congrats you won !\\n"
+print "Congrats you won !"
 
 # Alternative version using action
 
