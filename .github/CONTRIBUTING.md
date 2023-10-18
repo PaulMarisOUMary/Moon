@@ -6,8 +6,8 @@ The following is a set of guidelines/rules for contributing to the repository.
 
 Generally speaking questions are better suited in our resources below.
 
-- [Github Discussions Q&A](https://github.com/PaulMarisOUMary/MOONSHOT/discussions/)
-- [Documentation](https://github.com/PaulMarisOUMary/MOONSHOT#readme)
+- [Github Discussions Q&A](https://github.com/PaulMarisOUMary/Moon/discussions/)
+- [Documentation](https://github.com/PaulMarisOUMary/Moon#readme)
 
 Please do not ask questions on the issue tracker. Most of them don't belong there unless they provide value to a larger audience.
 
@@ -27,7 +27,7 @@ Please do not ask questions on the issue tracker. Most of them don't belong ther
 
 ## Code Guidelines
 
-:warning: Strongly recommended to use [conventions of the repository](https://github.com/PaulMarisOUMary/MOONSHOT/blob/main/.github/CONVENTIONS.md).
+:warning: Strongly recommended to use [conventions of the repository](https://github.com/PaulMarisOUMary/Moon/blob/main/.github/CONVENTIONS.md).
 
 ## Git commit Guidelines
 

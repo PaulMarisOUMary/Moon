@@ -17,10 +17,10 @@ PACKAGES = [
 setup(
     name="moon",
     author="PaulMarisOUMary",
-    url="https://github.com/PaulMarisOUMary/MOONSHOT",
+    url="https://github.com/PaulMarisOUMary/Moon",
     project_urls=
     {
-        "Issue tracker": "https://github.com/PaulMarisOUMary/MOONSHOT/issues"
+        "Issue tracker": "https://github.com/PaulMarisOUMary/Moon/issues"
     },
     version=VERSION,
     packages=PACKAGES,

@@ -78,8 +78,8 @@ Full text can be found [here: LICENSE](/LICENSE)
 For support and inquiries, please feel free to open an issue on GitHub or use the GitHub Discussions feature.
 Your feedback and questions are greatly appreciated and will help improve this project !
 
-- [Open an Issue](https://github.com/PaulMarisOUMary/MOONSHOT/issues)
-- [Join the Discussion](https://github.com/PaulMarisOUMary/MOONSHOT/discussions)
+- [Open an Issue](https://github.com/PaulMarisOUMary/Moon/issues)
+- [Join the Discussion](https://github.com/PaulMarisOUMary/Moon/discussions)
 
 ---
 
