@@ -1,2 +1,5 @@
+. # Moon library
+
+# Development dependencies
 pytest
 ply

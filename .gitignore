@@ -162,3 +162,6 @@ cython_debug/
 # Moon folder
 moon/parser.out
 moon/parsetab.py
+
+# Pytest
+/junit
