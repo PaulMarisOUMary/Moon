@@ -149,13 +149,15 @@ class LexTokenT(lex.LexToken):
 
 class IndentLexer():
 	def __init__(self, **kwargs) -> None:
-		self.lexer = lex.lex(**kwargs)
-		self.lexer.errors = []
+		self.lexer: lex.Lexer = lex.lex(**kwargs)
+		self.lexer.errors = [] # type: ignore
 		self.token_stream = None
 
 	@property
 	def errors(self):
-		return self.lexer.errors
+		"""This array holds a list of errors encountered (e.g., syntax errors).
+		It is populated after iterating through the input data using the lexer."""
+		return self.lexer.errors # type: ignore
 
 	def _indentation_filter(self, tokens):
 		current_indentation = 0
@@ -211,8 +213,7 @@ class IndentLexer():
 				type="DEDENT",
 			)
 
-	def _indent_tokens(self, lexer):
-		token = None
+	def _indent_tokens(self, lexer: lex.Lexer):
 		tokens = iter(lexer.token, None)
 		for token in self._indentation_filter(tokens):
 			yield token
@@ -222,14 +223,17 @@ class IndentLexer():
 		self.token_stream = self._indent_tokens(self.lexer)
 
 	def __iter__(self):
-		return self.token_stream
-	
-	def __list__(self):
-		return self.token_stream
+		if self.token_stream is None:
+			raise ValueError("The token_stream attribute is None, did you use input() ?")
+
+		return iter(self.token_stream)
 
 	def token(self):
+		if self.token_stream is None:
+			raise ValueError("The token_stream attribute is None, did you use input() ?")
+
 		try:
-			return next(self.token_stream) # type: ignore
+			return next(self.token_stream)
 		except StopIteration:
 			return None
 
@@ -237,7 +241,7 @@ def print_tokens(code: str):
 	lexer = build_lexer()
 	lexer.input(code)
 
-	for token in lexer: # type: ignore
+	for token in lexer:
 		print(token)
 
 def build_lexer(**kwargs):
