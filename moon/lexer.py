@@ -82,7 +82,7 @@ def t_BOOLEAN(t):
 
 # Identifier rule
 def t_IDENTIFIER(t):
-	r"[a-zA-Z_][a-zA-Z_0-9]*"
+	r"[a-zA-Z_][a-zA-Z_0-9]*|[\U0000231A-\U0001FAF8]"
 	t.type = reserved.get(t.value, "IDENTIFIER")  # Check for reserved words
 	return t
 
