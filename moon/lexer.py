@@ -135,7 +135,19 @@ def t_error(t):
 
 # ===== Lexer handling =====
 
-class IndentLexer(object):
+class LexTokenT(lex.LexToken):
+	value: Any
+	lineno: int
+	lexpos: int
+	type: str
+
+	def __init__(self, value: Any, lineno: int, lexpos: int, type: str) -> None:
+		self.value = value
+		self.lineno = lineno
+		self.lexpos = lexpos # lexpos == 0 for (INDENT || DEDENT)
+		self.type = type
+
+class IndentLexer():
 	def __init__(self, **kwargs) -> None:
 		self.lexer = lex.lex(**kwargs)
 		self.lexer.errors = []
@@ -144,14 +156,6 @@ class IndentLexer(object):
 	@property
 	def errors(self):
 		return self.lexer.errors
-
-	def _new_token(self, type: str, value: Any, lineno: int):
-		tok = lex.LexToken()
-		tok.type = type     # type: ignore
-		tok.value = value   # type: ignore
-		tok.lineno = lineno # type: ignore
-		tok.lexpos = 0      # type: ignore
-		return tok
 
 	def _indentation_filter(self, tokens):
 		current_indentation = 0
@@ -174,11 +178,21 @@ class IndentLexer(object):
 					next_token = next(tokens, None)
 
 				if indentation_count > current_indentation:
-					yield self._new_token("INDENT", indentation_count * '\t', token.lineno)
+					yield LexTokenT(
+						value=indentation_count * '\t',
+						lineno=token.lineno,
+						lexpos=0,
+						type="INDENT",
+					)
 
 				if indentation_count < current_indentation:
 					for i in range(current_indentation - indentation_count):
-						yield self._new_token("DEDENT", (current_indentation-(i+1))*'\t', token.lineno)
+						yield LexTokenT(
+							value=(current_indentation-(i+1))*'\t',
+							lineno=token.lineno,
+							lexpos=0,
+							type="DEDENT",
+						)
 
 				current_indentation = indentation_count
 
@@ -190,7 +204,12 @@ class IndentLexer(object):
 			is_first_token = False
 
 		for i in range(current_indentation):
-			yield self._new_token("DEDENT", (current_indentation-i)*'\t', token.lineno if token else 0)
+			yield LexTokenT(
+				value=(current_indentation-i)*'\t',
+				lineno=token.lineno if token else 0,
+				lexpos=0,
+				type="DEDENT",
+			)
 
 	def _indent_tokens(self, lexer):
 		token = None
