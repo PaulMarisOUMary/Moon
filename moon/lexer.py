@@ -62,7 +62,11 @@ t_GT = r'>'
 t_GE = r">="
 
 # Reserved words
-reserved = {k: v for k, v, used in reserved_keywords if used == '✅'}
+reserved = {
+	k: v 
+	for k, v, used in reserved_keywords 
+	if used == '✅'
+}
 
 # List of token names
 tokens = [
@@ -84,6 +88,7 @@ def t_BOOLEAN(t):
 def t_IDENTIFIER(t):
 	r"[a-zA-Z_][a-zA-Z_0-9]*|[\U0000231A-\U0001FAF8]"
 	t.type = reserved.get(t.value, "IDENTIFIER")  # Check for reserved words
+	# Might raise a warning if reserved (but not used) keyword detected
 	return t
 
 # Floating-point literal rule
