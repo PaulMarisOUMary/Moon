@@ -761,7 +761,117 @@ def test_t_stop(valid_stop):
 	assert tokens[0].type == "STOP"
 	assert len(lexer.errors) == 0
 
-# Test valid while
+
+
+# Test indent
+@pytest.mark.parametrize("input_str, n_indent", [
+	('', 0),
+	('\t', 0),
+	('l1\n\tl2', 1),
+	('l1\n\tl2\n\t\tl3', 2),
+	("""to_guess is 14
+
+# Version using while, skip and stop
+
+while true
+	guess is ask "Type your guess: "
+
+	if guess isnt to_guess
+		if guess < to_guess
+			print "Its More"
+		else
+			print "Its Less"
+		skip
+
+	stop
+
+print 'Congrats you won !'""", 4),
+	("""var is 14
+while true
+	guess is ask "Type your guess: "
+
+	if guess isnt var
+		if guess > 1
+			if guess > 2
+				if guess > 3
+					if guess > 4
+						print "Its More (:"
+		skip
+	stop
+
+print 'Congrats you won !'""", 6),
+])
+def test_t_indent(input_str, n_indent):
+	# Arrange
+	lexer = build_lexer()
+
+	# Act
+	lexer.input(input_str)
+	tokens = list(lexer)
+
+	# Assert
+	n_t_indent = [token for token in tokens if token.type == "INDENT"]
+
+	assert len(n_t_indent) == n_indent
+	assert len(lexer.errors) == 0
+
+# Test dedent
+@pytest.mark.parametrize("input_str, n_dedent", [
+	('', 0),
+	('\t', 0),
+	('l1\n\tl2', 1),
+	('l1\n\tl2\n\t\tl3', 2),
+	("""to_guess is 14
+
+# Version using while, skip and stop
+
+while true
+	guess is ask "Type your guess: "
+
+	if guess isnt to_guess
+		if guess < to_guess
+			print "Its More"
+		else
+			print "Its Less"
+		skip
+
+	stop
+
+print 'Congrats you won !'""", 4),
+	("""var is 14
+while true
+	guess is ask "Type your guess: "
+
+	if guess isnt var
+		if guess > 1
+			if guess > 2
+				if guess > 3
+					if guess > 4
+						print "Its More (:"
+		skip
+	stop
+
+print 'Congrats you won !'""", 6),
+])
+def test_t_dedent(input_str, n_dedent):
+	# Arrange
+	lexer = build_lexer()
+
+	# Act
+	lexer.input(input_str)
+	tokens = list(lexer)
+
+	# Assert
+	n_t_dedent = [token for token in tokens if token.type == "DEDENT"]
+
+	print(n_t_dedent)
+
+	assert len(n_t_dedent) == n_dedent
+	assert len(lexer.errors) == 0
+
+
+
+# Test indent
 @pytest.mark.parametrize("valid_while", [
 	"while",
 ])
