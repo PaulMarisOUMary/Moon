@@ -334,6 +334,29 @@ while count < 10
     count is count + 1
 ```
 
+Using `skip` and `stop` keywords:
+
+Example:
+```
+to_guess is 5
+guess is 0
+
+while true
+	guess is guess + 1
+
+	if guess isnt to_guess
+		if guess < to_guess
+			print "Its More"
+		else
+			print "Its Less"
+		skip
+
+	stop
+
+print "Guessed :" guess
+
+```
+
 #### Try-Catch and Raise Statements
 
 Try-catch statements are used to handle errors in the code. In our language, try-catch statements are named `test` and `fail`.
