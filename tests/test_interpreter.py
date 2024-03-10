@@ -19,9 +19,9 @@ def code_to_output(code):
     ("print 1", "1"),
     ("print 1.0", "1.0"),
     ("print \"Hello World\"", "Hello World"),
-    ("print true", "True"),
-    ("print false", "False"),
-    ("print null", "None"),
+    ("print true", "true"),
+    ("print false", "false"),
+    ("print null", "null"),
 ])
 def test_print_statement(input_code, expected_output, capsys):
     code_to_output(input_code)
@@ -46,12 +46,12 @@ def test_arithmetic_expressions(input_code, expected_output, capsys):
     assert captured.out.rstrip() == expected_output
 
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("print 1 < 1", "False"),
-    ("print 1 <= 1", "True"),
-    ("print 1 > 1", "False"),
-    ("print 1 >= 1", "True"),
-    ("print 1 is 1", "True"),
-    ("print 1 isnt 1", "False"),
+    ("print 1 < 1", "false"),
+    ("print 1 <= 1", "true"),
+    ("print 1 > 1", "false"),
+    ("print 1 >= 1", "true"),
+    ("print 1 is 1", "true"),
+    ("print 1 isnt 1", "false"),
 ])
 def test_comparison_expressions(input_code, expected_output, capsys):
     code_to_output(input_code)
@@ -61,9 +61,9 @@ def test_comparison_expressions(input_code, expected_output, capsys):
     assert captured.out.rstrip() == expected_output
 
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("print true and true", "True"),
-    ("print true or true", "True"),
-    ("print not true", "False"),
+    ("print true and true", "true"),
+    ("print true or true", "true"),
+    ("print not true", "false"),
 ])
 def test_logical_expressions(input_code, expected_output, capsys):
     code_to_output(input_code)
@@ -98,11 +98,11 @@ def test_variable_declaration_statements(input_code, expected_output, capsys):
     assert captured.out.rstrip() == expected_output
 
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("print true and false", "False"),
-    ("print false or true", "True"),
-    ("print not false", "True"),
-    ("print false isnt true", "True"),
-    ("print true is true", "True"),
+    ("print true and false", "false"),
+    ("print false or true", "true"),
+    ("print not false", "true"),
+    ("print false isnt true", "true"),
+    ("print true is true", "true"),
 ])
 def test_boolean_literals(input_code, expected_output, capsys):
     code_to_output(input_code)

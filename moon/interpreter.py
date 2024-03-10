@@ -8,6 +8,17 @@ class IOType:
 		self.output_method: Callable = output_method
 		self.input_method: Callable = input_method
 
+def custom_repr(*values: object):
+	return_values = []
+	for value in values:
+		to_str = str(value)
+		if isinstance(value, bool):
+			to_str = str(value).lower()
+		elif isinstance(value, type(None)):
+			to_str = "null"
+		return_values.append(to_str)
+	return return_values
+
 def evaluate_expression(exp, environment, io):
 	type, *args = exp
 	if type == "integer_literal":
@@ -84,7 +95,9 @@ def execute_statement(statement, environment, actions, io: IOType):
 		values = [evaluate_expression(exp, environment, io) for exp in args[0]]
 		return values if len(values) != 1 else values[0]
 	elif type == "print_statement":
-		io.output_method(*[evaluate_or_get_value(exp, environment, io) for exp in args[0]])
+		io.output_method(
+			*custom_repr(*[evaluate_or_get_value(exp, environment, io) for exp in args[0]])
+			)
 	elif type == "ask_statement":
 		io.input_method(args[0][1])
 
