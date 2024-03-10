@@ -1,107 +1,34 @@
-from typing import Callable
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-class IOType:
-	def __init__(self, 
-		output_method,
-		input_method
-	) -> None:
-		self.output_method: Callable = output_method
-		self.input_method: Callable = input_method
+# Interpreter types
+TStatement = Tuple[Any]
+TProgram = List[TStatement]
 
-def custom_repr(*values: object):
-	return_values = []
-	for value in values:
-		to_str = str(value)
-		if isinstance(value, bool):
-			to_str = str(value).lower()
-		elif isinstance(value, type(None)):
-			to_str = "null"
-		return_values.append(to_str)
-	return return_values
+TEnvironment = Dict[str, Any]
 
-def evaluate_expression(exp, environment, io):
-	type, *args = exp
-	if type == "integer_literal":
-		return int(args[0])
-	elif type == "float_literal":
-		return float(args[0])
-	elif type == "string_literal":
-		return str(args[0])
-	elif type == "boolean_literal":
-		return args[0]
-	elif type == "null_literal":
-		return None
-	elif type == "logical_expression" and args[0] == "not":
-		return not evaluate_or_get_value(args[1], environment, io)
-	elif type in ("arithmetic_expression", "comparison_expression", "logical_expression"):
-		operator, left, right = args
-		left_val = evaluate_or_get_value(left, environment, io)
-		right_val = evaluate_or_get_value(right, environment, io)
-		return eval(f"{repr(left_val)} {operator} {repr(right_val)}")
-	elif type == "variable_declaration_statement":
-		var_name, expression = args
-		value = evaluate_expression(expression, environment, io)
-		environment[var_name] = value
-		return value
+TStatementCallback = Optional[Callable]
+TOutputCallback = Callable[[object], None]
+TInputCallback = Callable[[object], str]
 
-def evaluate_or_get_value(expression, environment, io):
-	if isinstance(expression, tuple):
-		if expression[0] == "call_statement":
-			return execute_statement(expression, environment, {}, io)
-		return evaluate_expression(expression, environment, io)
-	return environment[expression]
+class BreakType:
+	pass
 
-def execute_statement(statement, environment, actions, io: IOType):
-	type, *args = statement
-	if type == "variable_declaration_statement":
-		var_name, value = args
-		environment[var_name] = handle_variable_declaration(value, environment, actions, io)
-	elif type == "if_statement":
-		condition, suite, else_suite = args
-		if evaluate_expression(condition, environment, io):
-			result = execute_statements(suite, environment, actions, io)
-			if result == "stop":
-				return "stop"
-			elif result == "skip":
-				return "skip"
-		elif else_suite:
-			return execute_statements(else_suite, environment, actions, io)
-	elif type == "while_statement":
-		condition, suite = args
-		while evaluate_expression(condition, environment, io):
-			skip = False
-			result = None
-			for inner_statement in suite:
-				result = execute_statement(inner_statement, environment, actions, io)
-				if result == "stop":
-					break
-				if result == "skip":
-					skip = True
-					break
-			if result == "stop":
-				break
-			if skip:
-				continue
-	elif type == "break_statement":
-		return "stop"
-	elif type == "continue_statement":
-		return "skip"
-	elif type == "action_statement":
-		name, params, suite = args
-		actions[name] = (params, suite)
-	elif type == "call_statement":
-		return handle_call_statement(args, environment, actions, io)
-	elif type == "return_statement":
-		values = [evaluate_expression(exp, environment, io) for exp in args[0]]
-		return values if len(values) != 1 else values[0]
-	elif type == "print_statement":
-		io.output_method(
-			*custom_repr(*[evaluate_or_get_value(exp, environment, io) for exp in args[0]])
-			)
-	elif type == "ask_statement":
-		io.input_method(args[0][1])
+class ContinueType: # ? Should be renamed to Skip
+	pass
 
-def auto_cast(value):
+class ReturnType:
+	def __init__(self, value) -> None:
+		self.value = value
+
+def custom_repr(value: object):
+	if isinstance(value, bool):
+		return str(value).lower()
+	elif isinstance(value, type(None)):
+		return "null"
+	else:
+		return str(value)
+
+def autocast(value):
 	try:
 		return int(value)
 	except ValueError:
@@ -110,42 +37,187 @@ def auto_cast(value):
 		except ValueError:
 			return value
 
-def handle_variable_declaration(value, environment, actions, io: IOType):
-    if isinstance(value, str):
-        return environment[value]
-    elif isinstance(value, tuple):
-        if value[0] == "ask_statement":
-            return auto_cast(io.input_method(value[1][1]))
-        if value[0] == "call_statement":
-            return execute_statement(value, environment, actions, io)
-    return evaluate_expression(value, environment, io)
 
-def handle_call_statement(args, environment, actions, io):
-    name, params = args
-    param_values = [evaluate_expression(p, environment, io) for p in params]
-    if name in actions:
-        func_params, func_body = actions[name]
-        local_env = environment.copy()
-        local_env.update(dict(zip(func_params, param_values)))
-        execute_statements(func_body, local_env, actions, io)
-        environment.update({k: v for k, v in local_env.items() if k in environment and v != environment.get(k)})
-        return local_env.get("return_value", None)
+def execute_statement(
+		statement: TStatement,
+		environment: TEnvironment,
+		/,
+		statement_callback: TStatementCallback,
+		output_callback: TOutputCallback = print,
+		input_callback: TInputCallback = input,
+		*args,
+		**kwargs,
+) -> Any:
+	def execute(
+			e_statement: TStatement,
+			e_environment: TEnvironment = environment,
+			call_statement: TStatementCallback = statement_callback,
+			call_output: TOutputCallback = output_callback,
+			call_input: TInputCallback = input_callback,
+			*e_args,
+			**e_kwargs,
+	):
+		return execute_statement(
+			e_statement,
+			e_environment,
+			call_statement,
+			call_output,
+			call_input,
+			*e_args,
+			**e_kwargs,
+		)
+	if statement_callback:
+		statement_callback(environment)
+	statement_type, *next = statement
 
-def execute_statements(statements, environment, actions, io):
-	for statement in statements:
-		result = execute_statement(statement, environment, actions, io)
-		if result == "stop":
-			return "stop"
-		if result == "skip":
-			return "skip"
-		if statement[0] == "return_statement":
-			environment["return_value"] = result
+	match statement_type:
+		# Primitive Types
+		case "integer_literal" | "float_literal" | "string_literal" | "boolean_literal":
+			return next[0]
+		case "null_literal":
+			return None
+		
+		# Composite Types
+		case "list_statement":
+			raise NotImplementedError
+		case "dict_statement":
+			raise NotImplementedError
+
+		# Variable Declaration and Initialization
+		case "variable_declaration_statement":
+			varname, expressions = next
+			varvalue = execute(expressions)
+			environment[varname] = varvalue
+
+		# Expressions
+		case "arithmetic_expression" | "comparison_expression" | "logical_expression":
+			operator, *expressions = next
+			if operator == "not":
+				return not execute(expressions[0])
+
+			left, right = expressions
+			leftvalue = execute(left)
+			rightvalue = execute(right)
+
+			return eval(f"{repr(leftvalue)} {operator} {repr(rightvalue)}")
+
+		# Control Structures
+		case "if_statement":
+			# CONTAINS BLOCK
+			condition, if_expressions, else_expressions = next
+			executed_condition = execute(condition)
+			if executed_condition:
+				for expression in if_expressions: # type: ignore
+					result = execute(expression)
+					if isinstance(result, (BreakType, ContinueType, ReturnType)):
+						return result
+			elif else_expressions:
+				for expression in else_expressions: # type: ignore
+					result = execute(expression)
+					if isinstance(result, (BreakType, ContinueType)):
+						return result
+
+		# Loop structure
+		case "while_statement":
+			# CONTAINS BLOCK
+			condition, block_expressions = next
+			while execute(condition):
+				result = None
+				for expression in block_expressions: # type: ignore
+					result = execute(expression)
+					if isinstance(result, (BreakType, ContinueType, ReturnType)):
+						break
+				if isinstance(result, BreakType):
+					break
+				elif isinstance(result, ReturnType):
+					return result
+				elif isinstance(result, ContinueType):
+					continue 
+
+		case "break_statement":
+			return BreakType()
+
+		case "continue_statement":
+			return ContinueType()
+
+		# Try-Catch and raise
+
+		# Functions
+		case "action_statement":
+			# CONTAINS BLOCK
+			funcname, params, block_expressions = next
+			environment[funcname] = (params, block_expressions)
+
+		case "call_statement":
+			funcname, params = next
+			param_values = [execute(p) for p in params] # type: ignore
+			
+			func_params, block_expressions = environment[funcname]
+
+			sub_environment = environment.copy()
+			sub_environment.update(dict(zip(func_params, param_values)))
+			result = None
+			for expression in block_expressions:
+				result = execute(expression, sub_environment)
+				if isinstance(result, ReturnType):
+					result = result.value
+					break
+			environment.update({k: v for k, v in sub_environment.items() if k in environment and v != environment.get(k)})
+			return result
+
+		case "return_statement":
+			expressions = next[0]
+			result = execute(expressions[0])
+			return ReturnType(result)
+
+		# Classes
+
+		# Modules
+
+		# Built-in
+		case "print_statement":
+			if len(next) > 1:
+				raise ValueError("print")
+			output_callback(
+				*[
+					custom_repr(
+						execute(expression)
+					)
+					for expression in next[0] # type: ignore
+				]
+			)
+		case "ask_statement":
+			prompt = execute(next[0])
+			return autocast(
+					input_callback(
+					prompt
+				)
+			)
+
+		# Variable
+		case _:
+			if isinstance(statement, str):
+				return environment[statement] # environment.get(statement, None)
+			else:
+				print(f"Un-case {statement}")
 
 def execute_program(
-		program,
-		output_method = print,
-		input_method = input
+		program: TProgram,
+		/,
+		statement_callback: TStatementCallback = None,
+		output_callback: TOutputCallback = print,
+		input_callback: TInputCallback = input,
 	) -> None:
-	environment = {}
-	actions = {}
-	execute_statements(program, environment, actions, IOType(output_method, input_method))
+	environment = dict()
+
+	if not program:
+		raise ValueError("No instruction")
+
+	for statement in program:
+		execute_statement(
+			statement,
+			environment,
+			statement_callback,
+			output_callback,
+			input_callback
+		)
