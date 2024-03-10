@@ -61,6 +61,24 @@ def test_t_float(valid_float):
 	assert tokens[0].type == "FLOAT"
 	assert len(lexer.errors) == 0
 
+# Test valid negative float
+@pytest.mark.parametrize("valid_float", [
+	"-1.1",
+	"-0.00000000",
+])
+def test_t_float_negative(valid_float):
+	# Arrange
+	lexer = build_lexer()
+
+	# Act
+	lexer.input(valid_float)
+	tokens = list(lexer)
+
+	# Assert
+	assert len(tokens) == 1
+	assert tokens[0].type == "FLOAT"
+	assert len(lexer.errors) == 0
+
 # Test valid integer
 @pytest.mark.parametrize("valid_integer", [
 	"0",
@@ -68,6 +86,24 @@ def test_t_float(valid_float):
 	"4096",
 ])
 def test_t_integer(valid_integer):
+	# Arrange
+	lexer = build_lexer()
+
+	# Act
+	lexer.input(valid_integer)
+	tokens = list(lexer)
+
+	# Assert
+	assert len(tokens) == 1
+	assert tokens[0].type == "INTEGER"
+	assert len(lexer.errors) == 0
+
+# Test valid negative integer
+@pytest.mark.parametrize("valid_integer", [
+	"-1",
+	"-4096",
+])
+def test_t_integer_negative(valid_integer):
 	# Arrange
 	lexer = build_lexer()
 

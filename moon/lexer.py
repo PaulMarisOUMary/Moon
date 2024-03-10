@@ -51,7 +51,7 @@ t_ignore = ' '
 
 # Regular expression rules for simple tokens
 t_PLUS = r'\+'
-t_MINUS = r'-'
+t_MINUS = r"-(?!\d+)"
 t_MULTIPLY = r'\*'
 t_DIVIDE = r'/'
 t_MODULO = r'%'
@@ -93,13 +93,13 @@ def t_IDENTIFIER(t):
 
 # Floating-point literal rule
 def t_FLOAT(t):
-	r"\d+\.\d+"
+	r"-?\d+\.\d+"
 	t.value = float(t.value)
 	return t
 
 # Integer literal rule
 def t_INTEGER(t):
-	r"\b(0|[1-9][0-9]*)\b"
+	r"-?[1-9][0-9]*|0\b"
 	t.value = int(t.value)
 	return t
 
