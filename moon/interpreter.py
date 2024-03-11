@@ -10,13 +10,13 @@ TStatementCallback = Optional[Callable]
 TOutputCallback = Callable[[object], None]
 TInputCallback = Callable[[object], str]
 
-class BreakType:
+class StopType:
 	pass
 
-class ContinueType: # ? Should be renamed to Skip
+class SkipType:
 	pass
 
-class ReturnType:
+class ResultType:
 	def __init__(self, value) -> None:
 		self.value = value
 
@@ -102,53 +102,53 @@ def execute_statement(
 			return eval(f"{repr(leftvalue)} {operator} {repr(rightvalue)}")
 
 		# Control Structures
-		case "if_statement":
+		case "ifelse_statements":
 			# CONTAINS BLOCK
 			condition, if_expressions, else_expressions = next
 			executed_condition = execute(condition)
 			if executed_condition:
 				for expression in if_expressions: # type: ignore
 					result = execute(expression)
-					if isinstance(result, (BreakType, ContinueType, ReturnType)):
+					if isinstance(result, (StopType, SkipType, ResultType)):
 						return result
 			elif else_expressions:
 				for expression in else_expressions: # type: ignore
 					result = execute(expression)
-					if isinstance(result, (BreakType, ContinueType)):
+					if isinstance(result, (StopType, SkipType)):
 						return result
 
 		# Loop structure
-		case "while_statement":
+		case "while_statements":
 			# CONTAINS BLOCK
 			condition, block_expressions = next
 			while execute(condition):
 				result = None
 				for expression in block_expressions: # type: ignore
 					result = execute(expression)
-					if isinstance(result, (BreakType, ContinueType, ReturnType)):
+					if isinstance(result, (StopType, SkipType, ResultType)):
 						break
-				if isinstance(result, BreakType):
+				if isinstance(result, StopType):
 					break
-				elif isinstance(result, ReturnType):
+				elif isinstance(result, ResultType):
 					return result
-				elif isinstance(result, ContinueType):
+				elif isinstance(result, SkipType):
 					continue 
 
-		case "break_statement":
-			return BreakType()
+		case "stop_statement":
+			return StopType()
 
-		case "continue_statement":
-			return ContinueType()
+		case "skip_statement":
+			return SkipType()
 
 		# Try-Catch and raise
 
 		# Functions
-		case "action_statement":
+		case "action_statements":
 			# CONTAINS BLOCK
 			funcname, params, block_expressions = next
 			environment[funcname] = (params, block_expressions)
 
-		case "call_statement":
+		case "call":
 			funcname, params = next
 			param_values = [execute(p) for p in params] # type: ignore
 			
@@ -159,16 +159,16 @@ def execute_statement(
 			result = None
 			for expression in block_expressions:
 				result = execute(expression, sub_environment)
-				if isinstance(result, ReturnType):
+				if isinstance(result, ResultType):
 					result = result.value
 					break
 			environment.update({k: v for k, v in sub_environment.items() if k in environment and v != environment.get(k)})
 			return result
 
-		case "return_statement":
+		case "result_statement":
 			expressions = next[0]
 			result = execute(expressions[0])
-			return ReturnType(result)
+			return ResultType(result)
 
 		# Classes
 
@@ -176,17 +176,9 @@ def execute_statement(
 
 		# Built-in
 		case "print_statement":
-			if len(next) > 1:
-				raise ValueError("print")
-			output_callback(
-				*[
-					custom_repr(
-						execute(expression)
-					)
-					for expression in next[0] # type: ignore
-				]
-			)
-		case "ask_statement":
+			output_callback(*[custom_repr(execute(expression)) for expression in next[0]]) # type: ignore
+
+		case "ask":
 			prompt = execute(next[0])
 			return autocast(
 					input_callback(

@@ -43,7 +43,7 @@ def test_boolean_literal(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 ## Null
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("null", [("null_literal")]),
+    ("null", [("null_literal",)]),
 ])
 def test_null_literal(input_code, expected_output):
     assert parse_code(input_code) == expected_output
@@ -136,7 +136,7 @@ def test_ask(input_code, expected_output):
 ## Variable Assignment
 @pytest.mark.parametrize("input_code, expected_output", [
     # Literals assignment
-    ("var is null", [("variable_declaration_statement", "var", ("null_literal"))]),
+    ("var is null", [("variable_declaration_statement", "var", ("null_literal",))]),
     ("var is false", [("variable_declaration_statement", "var", ("boolean_literal", False))]),
     ("var is true", [("variable_declaration_statement", "var", ("boolean_literal", True))]),
     ("var is 1", [("variable_declaration_statement", "var", ("integer_literal", 1))]),
@@ -173,14 +173,14 @@ def test_variable_declaration_statement(input_code, expected_output):
 
 ## Stop
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("stop", [("stop_statement")]),
+    ("stop", [("stop_statement",)]),
 ])
 def test_stop_statement(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 
 ## Skip
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("skip", [("skip_statement")]),
+    ("skip", [("skip_statement",)]),
 ])
 def test_skip_statement(input_code, expected_output):
     assert parse_code(input_code) == expected_output
@@ -230,11 +230,11 @@ def test_while_statements(input_code, expected_output):
 
 ## Action
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("action func_name\n\tprint 1", [("action_statement", "func_name", [], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name\n\tprint 1\n\tprint 2", [("action_statement", "func_name", [], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
-    ("action func_name a\n\tprint 1", [("action_statement", "func_name", ['a'], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name a b\n\tprint 1", [("action_statement", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name a b\n\tprint 1\n\tprint 2", [("action_statement", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
+    ("action func_name\n\tprint 1", [("action_statements", "func_name", [], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name\n\tprint 1\n\tprint 2", [("action_statements", "func_name", [], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
+    ("action func_name a\n\tprint 1", [("action_statements", "func_name", ['a'], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name a b\n\tprint 1", [("action_statements", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name a b\n\tprint 1\n\tprint 2", [("action_statements", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
 ])
 def test_action_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output

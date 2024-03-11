@@ -3,6 +3,8 @@ from ply.yacc import YaccProduction as TYP
 
 from .lexer import tokens, LexTokenT
 
+# REMINDER: (value) in Python is not a tuple; (value,) is a tuple
+
 tokens = tokens
 
 precedence = (
@@ -65,7 +67,7 @@ def p_optional_inline_params(p: TYP):
 
 def p_action_statements(p: TYP):
 	"""action_statements : ACTION IDENTIFIER optional_inline_params suite"""
-	p[0] = ("action_statement", p[2], p[3], p[4])
+	p[0] = ("action_statements", p[2], p[3], p[4])
 
 ## Composite
 
@@ -105,11 +107,11 @@ def p_variable_declaration_statement(p: TYP):
 
 def p_stop_statement(p: TYP):
 	"""stop_statement : STOP"""
-	p[0] = ("stop_statement")
+	p[0] = ("stop_statement", )
 
 def p_skip_statement(p: TYP):
 	"""skip_statement : SKIP"""
-	p[0] = ("skip_statement")
+	p[0] = ("skip_statement", )
 
 def p_result_statement(p: TYP):
 	"""result_statement : RESULT optional_inline_args"""
@@ -204,7 +206,7 @@ def p_integer_boolean(p: TYP):
 
 def p_integer_null(p: TYP):
 	"""null_literal : NULL"""
-	p[0] = ("null_literal")
+	p[0] = ("null_literal",)
 
 # Empty
 
