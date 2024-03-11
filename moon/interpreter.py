@@ -78,10 +78,10 @@ def execute_statement(
 			return None
 		
 		# Composite Types
-		case "list_statement":
-			raise NotImplementedError
-		case "dict_statement":
-			raise NotImplementedError
+		case "list_composite":
+			raise NotImplementedError("Lists are not yet implemented.")
+		case "dict_composite":
+			raise NotImplementedError("Dictionaries are not yet implemented.")
 
 		# Variable Declaration and Initialization
 		case "variable_declaration_statement":
