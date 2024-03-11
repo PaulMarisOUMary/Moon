@@ -1,6 +1,7 @@
 import ply.yacc as yacc
+from ply.yacc import YaccProduction as TYP
 
-from .lexer import tokens
+from .lexer import tokens, LexTokenT
 
 tokens = tokens
 
@@ -14,11 +15,13 @@ precedence = (
 	("right", "EXPONENT"),
 )
 
-def p_program(p):
+def p_program(p: TYP):
 	"""program : statements"""
 	p[0] = p[1]
 
-def p_statements(p):
+# Statements
+
+def p_statements(p: TYP):
 	"""statements : statements statement
 				  | statement"""
 	if len(p) == 3:
@@ -26,23 +29,17 @@ def p_statements(p):
 	else:
 		p[0] = [p[1]]
 
-def p_statement(p):
-	"""statement : line NEWLINE
-				 | if_statement
-				 | while_statement
-				 | break_statement
-				 | continue_statement
-				 | action_statement
-				 | result_statement
-				 | call_statement
-				 | print_statement"""
-	p[0] = p[1]
+def p_suite(p: TYP):
+	"""suite : NEWLINE INDENT statements DEDENT"""
+	p[0] = p[3]
 
-def p_if_statement(p):
-	"""if_statement : IF conditional_test suite optional_else"""
-	p[0] = ("if_statement", p[2], p[3], (p[4] if len(p) == 5 else None))
+## If / Else
 
-def p_optional_else(p):
+def p_ifelse_statements(p: TYP):
+	"""ifelse_statements : IF expression suite optional_else"""
+	p[0] = ("ifelse_statements", p[2], p[3], (p[4] if len(p) == 5 else None))
+
+def p_optional_else(p: TYP):
 	"""optional_else : ELSE suite
 					 | empty"""
 	if len(p) == 3:
@@ -50,94 +47,114 @@ def p_optional_else(p):
 	else:
 		p[0] = None
 
-def p_while_statement(p):
-	"""while_statement : WHILE conditional_test suite"""
-	p[0] = ("while_statement", p[2], p[3])
+## While
 
-def p_action_statement(p):
-	"""action_statement : ACTION IDENTIFIER optional_params suite"""
+def p_while_statements(p: TYP):
+	"""while_statements : WHILE expression suite"""
+	p[0] = ("while_statements", p[2], p[3])
+
+## Action
+
+def p_optional_inline_params(p: TYP):
+	"""optional_inline_params : IDENTIFIER optional_inline_params
+							  | empty"""
+	if len(p) == 3:
+		p[0] = [p[1]] + p[2]
+	else:
+		p[0] = []
+
+def p_action_statements(p: TYP):
+	"""action_statements : ACTION IDENTIFIER optional_inline_params suite"""
 	p[0] = ("action_statement", p[2], p[3], p[4])
 
-def p_call_statement(p):
-    """call_statement : CALL IDENTIFIER optional_call_params"""
-    p[0] = ("call_statement", p[2], p[3])
+## Composite
 
-def p_optional_params(p):
-	"""optional_params : IDENTIFIER optional_params
-					   | empty"""
+def p_list_composite(p: TYP):
+	"""list_composite : LIST suite
+					  | LIST NEWLINE"""
+
+	p[0] = ("list_composite", p[2] if not p[2] == '\n' else [])
+
+# Statement
+
+def p_statement(p: TYP):
+	"""statement : expression NEWLINE
+				 | stop_statement NEWLINE
+				 | skip_statement NEWLINE
+				 | result_statement NEWLINE
+				 | print_statement NEWLINE
+				 | variable_declaration_statement
+				 | ifelse_statements
+				 | while_statements
+				 | action_statements
+				 | list_composite"""
+	p[0] = p[1]
+
+def p_optional_inline_args(p: TYP):
+	"""optional_inline_args : expression optional_inline_args
+							| empty"""
 	if len(p) == 3:
 		p[0] = [p[1]] + p[2]
 	else:
 		p[0] = []
 
-def p_optional_call_params(p):
-	"""optional_call_params : expression optional_call_params
-					   		| empty"""
-	if len(p) == 3:
-		p[0] = [p[1]] + p[2]
-	else:
-		p[0] = []
+def p_variable_declaration_statement(p: TYP):
+	"""variable_declaration_statement : IDENTIFIER IS expression NEWLINE
+									  | IDENTIFIER IS list_composite"""
+	p[0] = ("variable_declaration_statement", p[1], p[3])
 
-def p_suite(p):
-	"""suite : NEWLINE INDENT statements DEDENT"""
-	p[0] = p[3]
+def p_stop_statement(p: TYP):
+	"""stop_statement : STOP"""
+	p[0] = ("stop_statement")
 
-def p_line(p):
-	"""line : variable_declaration_statement
-			| expression"""
-	p[0] = p[1]
+def p_skip_statement(p: TYP):
+	"""skip_statement : SKIP"""
+	p[0] = ("skip_statement")
 
-def p_variable_declaration_statement(p):
-    """variable_declaration_statement : IDENTIFIER IS expression"""
-    p[0] = ("variable_declaration_statement", p[1], p[3])
+def p_result_statement(p: TYP):
+	"""result_statement : RESULT optional_inline_args"""
+	p[0] = ("result_statement", p[2])
 
-def p_conditional_test(p):
-	"""conditional_test : comparison_expression
-			   | logical_expression
-			   | arithmetic_expression
-			   | boolean_literal
-			   | null_literal"""
-	p[0] = p[1]
+def p_print_statement(p: TYP):
+	"""print_statement : PRINT optional_inline_args"""
+	p[0] = ("print_statement", p[2])
 
-def p_literals(p):
-	"""literals : integer_literal
-			   | float_literal
-			   | string_literal
-			   | boolean_literal
-			   | null_literal"""
-	p[0] = p[1]
+# Expressions
 
-def p_interger_literal(p):
-	"""integer_literal : INTEGER"""
-	p[0] = ("integer_literal", p[1])
-
-def p_float_literal(p):
-	"""float_literal : FLOAT"""
-	p[0] = ("float_literal", p[1])
-
-def p_string_literal(p):
-	"""string_literal : STRING"""
-	p[0] = ("string_literal", p[1])
-
-def p_boolean_literal(p):
-	"""boolean_literal : BOOLEAN"""
-	p[0] = ("boolean_literal", p[1])
-
-def p_null_literal(p):
-	"""null_literal : NULL"""
-	p[0] = ("null_literal", p[1])
-
-def p_expression(p):
+def p_expression(p: TYP):
 	"""expression : literals
-				  | comparison_expression
 				  | arithmetic_expression
+				  | comparison_expression
 				  | logical_expression
-				  | call_statement
-				  | ask_statement
+				  | call
+				  | ask
 				  | IDENTIFIER"""
 	p[0] = p[1]
 
-def p_comparison_expression(p):
+## Call
+
+def p_call(p: TYP):
+	"""call : CALL IDENTIFIER optional_inline_args"""
+	p[0] = ("call", p[2], p[3])
+
+## Ask
+
+def p_ask(p: TYP):
+	"""ask : ASK optional_inline_args"""
+	p[0] = ("ask", p[2])
+
+## Arithmetic, Comparison & Logical - Expressions
+
+def p_arithmetic_expression(p: TYP):
+	"""arithmetic_expression : expression PLUS expression
+							 | expression MINUS expression
+							 | expression MULTIPLY expression
+							 | expression DIVIDE expression
+							 | expression MODULO expression
+							 | expression EXPONENT expression"""
+	p[0] = ("arithmetic_expression", p[2], p[1], p[3])
+
+def p_comparison_expression(p: TYP):
 	"""comparison_expression : expression LT expression
 							 | expression LE expression
 							 | expression IS expression
@@ -150,78 +167,60 @@ def p_comparison_expression(p):
 		p[2] = "!="
 	p[0] = ("comparison_expression", p[2], p[1], p[3])
 
-def p_arithmetic_expression(p):
-	"""arithmetic_expression : expression PLUS expression
-							 | expression MINUS expression
-							 | expression MULTIPLY expression
-							 | expression DIVIDE expression
-							 | expression MODULO expression
-							 | expression EXPONENT expression"""
-	p[0] = ("arithmetic_expression", p[2], p[1], p[3])
-
-def p_logical_expression(p):
+def p_logical_expression(p: TYP):
 	"""logical_expression : expression AND expression
 						  | expression OR expression
 						  | NOT expression"""
-	# Add the appropriate action here, depending on the logical operator
 	if len(p) == 4:
 		p[0] = ("logical_expression", p[2], p[1], p[3])
 	else:
 		p[0] = ("logical_expression", p[1], p[2])
 
-def p_break_statement(p):
-	"""break_statement : STOP NEWLINE"""
-	p[0] = ("break_statement",)
+## Literals
 
-def p_continue_statement(p):
-	"""continue_statement : SKIP NEWLINE"""
-	p[0] = ("continue_statement",)
+def p_literals(p: TYP):
+	"""literals : integer_literal
+				| float_literal
+				| string_literal
+				| boolean_literal
+				| null_literal"""
+	p[0] = p[1]
 
-def p_result(p):
-	"""result_statement : RESULT optional_results NEWLINE
-						| RESULT NEWLINE"""
-	if len(p) == 4:
-		p[0] = ("return_statement", p[2])
-	else:
-		p[0] = ("return_statement", [])
+def p_integer_literal(p: TYP):
+	"""integer_literal : INTEGER"""
+	p[0] = ("integer_literal", p[1])
 
-def p_optional_result(p):
-	"""optional_results : expression optional_results
-					   | expression"""
-	if len(p) == 3:
-		p[0] = [p[1]] + p[2]
-	else:
-		p[0] = [p[1]]
+def p_integer_float(p: TYP):
+	"""float_literal : FLOAT"""
+	p[0] = ("float_literal", p[1])
 
-def p_ask_statement(p):
-	"""ask_statement : ASK string_literal"""
-	p[0] = ("ask_statement", p[2])
+def p_integer_string(p: TYP):
+	"""string_literal : STRING"""
+	p[0] = ("string_literal", p[1])
 
-def p_print_statement(p):
-	"""print_statement : PRINT optional_prints NEWLINE
-					   | PRINT NEWLINE"""
-	if len(p) == 4:
-		p[0] = ("print_statement", p[2])
-	else:
-		p[0] = ("print_statement", [])
+def p_integer_boolean(p: TYP):
+	"""boolean_literal : BOOLEAN"""
+	p[0] = ("boolean_literal", p[1])
 
-def p_optional_prints(p):
-	"""optional_prints : expression optional_prints
-					   | expression"""
-	if len(p) == 3:
-		p[0] = [p[1]] + p[2]
-	else:
-		p[0] = [p[1]]
+def p_integer_null(p: TYP):
+	"""null_literal : NULL"""
+	p[0] = ("null_literal")
 
-def p_empty(p):
+# Empty
+
+def p_empty(p: TYP):
 	"""empty :"""
 	pass
 
-def p_error(p):
+# Error
+
+def p_error(p: LexTokenT):
 	if p:
-		pass # lexer already handle this kind of error
+		print(f"! ParserError: {p}")
 	else:
-		print("Syntax error at EOF")
+		print("! Syntax error at EOF")
+
+
 
 # ===== END OF PARSER =====
 

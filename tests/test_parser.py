@@ -11,197 +11,230 @@ def parse_code(code):
     return parser.parse(code+'\n', lexer=lexer)
 
 # Literals
+
+## Integer
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("1", [('integer_literal', 1)]),
-    ("1.0", [('float_literal', 1.0)]),
-    ("\"Hello World\"", [('string_literal', "Hello World")]),
-    ("true", [('boolean_literal', True)]),
-    ("false", [('boolean_literal', False)]),
-    ("null", [('null_literal', 'null')]),
+    ("0", [("integer_literal", 0)]),
+    ("4096", [("integer_literal", 4096)]),
 ])
-def test_literals(input_code, expected_output):
+def test_integer_literal(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+## Float
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("0.0001", [("float_literal", 0.0001)]),
+    ("1.4096", [("float_literal", 1.4096)]),
+    ("-4.4096", [("float_literal", -4.4096)]),
+])
+def test_float_literal(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+## String
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("\"Hello World\"", [("string_literal", "Hello World")]),
+    ("'Hello World'", [("string_literal", "Hello World")]),
+])
+def test_string_literal(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+## Boolean
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("true", [("boolean_literal", True)]),
+    ("false", [("boolean_literal", False)]),
+])
+def test_boolean_literal(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+## Null
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("null", [("null_literal")]),
+])
+def test_null_literal(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 
-# Expressions
+# Composite
 
-# Arithmetic expressions
+## Lists
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("1 + 1", [('arithmetic_expression', '+', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 - 1", [('arithmetic_expression', '-', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 * 1", [('arithmetic_expression', '*', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 / 1", [('arithmetic_expression', '/', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 % 1", [('arithmetic_expression', '%', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 ** 1", [('arithmetic_expression', '**', ('integer_literal', 1), ('integer_literal', 1))]),
-
-])
-def test_arithmetic_expressions(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Comparison expressions
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("1 < 1", [('comparison_expression', '<', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 <= 1", [('comparison_expression', '<=', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 > 1", [('comparison_expression', '>', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 >= 1", [('comparison_expression', '>=', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 is 1", [('comparison_expression', '==', ('integer_literal', 1), ('integer_literal', 1))]),
-    ("1 isnt 1", [('comparison_expression', '!=', ('integer_literal', 1), ('integer_literal', 1))]),
-])
-def test_comparison_expressions(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Logical expressions
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("true and true", [('logical_expression', 'and', ('boolean_literal', True), ('boolean_literal', True))]),
-    ("true or true", [('logical_expression', 'or', ('boolean_literal', True), ('boolean_literal', True))]),
-    ("not true", [('logical_expression', 'not', ('boolean_literal', True))]),
-])
-def test_logical_expressions(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Unary expressions
-"""MISSING"""
-
-# Grouping expressions
-"""MISSING"""
-
-# Statements
-
-# Variable declaration statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("x is 1", [('variable_declaration_statement', 'x', ('integer_literal', 1))]),
-])
-def test_variable_declaration_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# If statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\t1", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)], None)]),
-    ("if true\n\tif false\n\t\t1", [
-        ('if_statement', ('boolean_literal', True), [
-            ('if_statement', ('boolean_literal', False), [
-                ('integer_literal', 1)
-            ], None)
-        ], None)
-    ]),
-    ("if true\n\tif false\n\t\tvariable is 3\n\t\tif true\n\t\t\tvariable is 5\n\t\tvariable is 6", 
-        [('if_statement', ('boolean_literal', True),
-            [('if_statement', ('boolean_literal', False), 
-                [('variable_declaration_statement', 'variable', ('integer_literal', 3)),
-                ('if_statement', ('boolean_literal', True),
-                [('variable_declaration_statement', 'variable', ('integer_literal', 5))], None),
-                ('variable_declaration_statement', 'variable', ('integer_literal', 6))], None)],
-            None)]
-    ),
-])
-def test_if_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# If else statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\t1\nelse\n\t2", [('if_statement', ('boolean_literal', True), [('integer_literal', 1)], [('integer_literal', 2)])]),
-    ("if true\n\t1\nelse\n\tif false\n\t\t2\n\telse\n\t\t3", [
-        ('if_statement', ('boolean_literal', True), [
-            ('integer_literal', 1)
-        ], [
-            ('if_statement', ('boolean_literal', False), [
-                ('integer_literal', 2)
-            ], [
-                ('integer_literal', 3)
+    ("list", [("list_composite", [])]),
+    ("list\n\t0", [("list_composite", [("integer_literal", 0)])]),
+    ("list\n\t1\n\t2\n\t3\n\t4\n\t5\n\tlist\n\t\t'a'\n\t\t'b'\n\t\tlist\n\t\t\ttrue\n\t\t\tfalse\n\t\t'c'\n\t\t'd'", [
+        ("list_composite", [
+            ("integer_literal", 1),
+            ("integer_literal", 2),
+            ("integer_literal", 3),
+            ("integer_literal", 4),
+            ("integer_literal", 5),
+            ("list_composite", [
+                ("string_literal", 'a'),
+                ("string_literal", 'b'),
+                ("list_composite", [
+                    ("boolean_literal", True),
+                    ("boolean_literal", False)
+                ]),
+                ("string_literal", 'c'),
+                ("string_literal", 'd')
             ])
         ])
     ]),
 ])
-def test_if_else_statements(input_code, expected_output):
+def test_composite_lists(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 
-# While statements
+## Dict
+
+# Expressions
+
+## Arithmetic
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("while true\n\t1", [('while_statement', ('boolean_literal', True), [('integer_literal', 1)])]),
-    ("while true\n\t1\nwhile false or true\n\t2\n\twhile true\n\t\twhile true\n\t\t\t3\n\t4", [
-	('while_statement', ('boolean_literal', True), [
-		('integer_literal', 1)]), 
-	('while_statement', ('logical_expression', 'or', ('boolean_literal', False), ('boolean_literal', True)), [
-		('integer_literal', 2), 
-		('while_statement', ('boolean_literal', True), [
-			('while_statement', ('boolean_literal', True), [
-				('integer_literal', 3)
-				])
-			]), 
-		('integer_literal', 4)
-	])
-]),
+    ("1 + 2", [("arithmetic_expression", '+', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 - 2", [("arithmetic_expression", '-', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 * 2", [("arithmetic_expression", '*', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 / 2", [("arithmetic_expression", '/', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 % 2", [("arithmetic_expression", '%', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 ** 2", [("arithmetic_expression", "**", ("integer_literal", 1), ("integer_literal", 2))]),
+])
+def test_arithmetic_expression(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Comparison
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("1 < 2", [("comparison_expression", '<', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 <= 2", [("comparison_expression", "<=", ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 > 2", [("comparison_expression", '>', ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 >= 2", [("comparison_expression", ">=", ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 is 2", [("comparison_expression", "==", ("integer_literal", 1), ("integer_literal", 2))]),
+    ("1 isnt 2", [("comparison_expression", "!=", ("integer_literal", 1), ("integer_literal", 2))]),
+])
+def test_comparison_expression(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Logical
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("true and false", [("logical_expression", "and", ("boolean_literal", True), ("boolean_literal", False))]),
+    ("true or false", [("logical_expression", "or", ("boolean_literal", True), ("boolean_literal", False))]),
+    ("not true", [("logical_expression", "not", ("boolean_literal", True))]),
+])
+def test_logical_expression(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Call
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("call func_name", [("call", "func_name", [])]),
+    ("call func_name 1 2 3 4", [("call", "func_name", [("integer_literal", 1), ("integer_literal", 2), ("integer_literal", 3), ("integer_literal", 4)])]),
+])
+def test_call(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Ask
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("ask", [("ask", [])]),
+    ("ask 'prompt'", [("ask", [("string_literal", "prompt")])]),
+    ("ask 'prompt' 'prompt 2'", [("ask", [("string_literal", "prompt"), ("string_literal", "prompt 2")])]),
+])
+def test_ask(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Statement
+
+## Variable Assignment
+@pytest.mark.parametrize("input_code, expected_output", [
+    # Literals assignment
+    ("var is null", [("variable_declaration_statement", "var", ("null_literal"))]),
+    ("var is false", [("variable_declaration_statement", "var", ("boolean_literal", False))]),
+    ("var is true", [("variable_declaration_statement", "var", ("boolean_literal", True))]),
+    ("var is 1", [("variable_declaration_statement", "var", ("integer_literal", 1))]),
+    ("var is 1.1", [("variable_declaration_statement", "var", ("float_literal", 1.1))]),
+    ("var is 'str'", [("variable_declaration_statement", "var", ("string_literal", "str"))]),
+    # Arithmetic
+    ("var is 1 + 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '+', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 - 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '-', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 * 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '*', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 / 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '/', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 % 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '%', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 ** 2", [("variable_declaration_statement", "var", ("arithmetic_expression", "**", ("integer_literal", 1), ("integer_literal", 2)))]),
+    # Comparison
+    ("var is 1 < 2", [("variable_declaration_statement", "var", ("comparison_expression", '<', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 <= 2", [("variable_declaration_statement", "var", ("comparison_expression", "<=", ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 > 2", [("variable_declaration_statement", "var", ("comparison_expression", '>', ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 >= 2", [("variable_declaration_statement", "var", ("comparison_expression", ">=", ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 is 2", [("variable_declaration_statement", "var", ("comparison_expression", "==", ("integer_literal", 1), ("integer_literal", 2)))]),
+    ("var is 1 isnt 2", [("variable_declaration_statement", "var", ("comparison_expression", "!=", ("integer_literal", 1), ("integer_literal", 2)))]),
+    # Logical
+    ("var is true and false", [("variable_declaration_statement", "var", ("logical_expression", "and", ("boolean_literal", True), ("boolean_literal", False)))]),
+    ("var is true or false", [("variable_declaration_statement", "var", ("logical_expression", "or", ("boolean_literal", True), ("boolean_literal", False)))]),
+    ("var is not true", [("variable_declaration_statement", "var", ("logical_expression", "not", ("boolean_literal", True)))]),
+    # Call
+    ("var is call func_name", [("variable_declaration_statement", "var", ("call", "func_name", []))]),
+    ("var is call func_name 1 2", [("variable_declaration_statement", "var", ("call", "func_name", [("integer_literal", 1), ("integer_literal", 2)]))]),
+    # Ask
+    ("var is ask", [("variable_declaration_statement", "var", ("ask", []))]),
+    ("var is ask 'prompt'", [("variable_declaration_statement", "var", ("ask", [("string_literal", "prompt")]))]),
+    ("var is ask 'prompt' 'prompt 2'", [("variable_declaration_statement", "var", ("ask", [("string_literal", "prompt"), ("string_literal", "prompt 2")]))]),
+])
+def test_variable_declaration_statement(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Stop
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("stop", [("stop_statement")]),
+])
+def test_stop_statement(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Skip
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("skip", [("skip_statement")]),
+])
+def test_skip_statement(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Result
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("result", [("result_statement", [])]),
+    ("result 1", [("result_statement", [("integer_literal", 1)])]),
+    ("result 1 2", [("result_statement", [("integer_literal", 1), ("integer_literal", 2)])]),
+])
+def test_result_statement(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## Print
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("print", [("print_statement", [])]),
+    ("print 1", [("print_statement", [("integer_literal", 1)])]),
+    ("print 1 2", [("print_statement", [("integer_literal", 1), ("integer_literal", 2)])]),
+])
+def test_print_statement(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+# Statements
+
+## If
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("if true\n\tprint 1", [("ifelse_statements", ("boolean_literal", True), [("print_statement",[("integer_literal", 1)])], None)]),
+    ("if true\n\tprint 1\n\tprint 2", [("ifelse_statements", ("boolean_literal", True), [("print_statement",[("integer_literal", 1)]), ("print_statement",[("integer_literal", 2)])], None)]),
+])
+def test_if_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("if true\n\tprint 1\nelse\n\tprint 2", [("ifelse_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)])], [("print_statement", [("integer_literal", 2)])])]),
+    ("if true\n\tprint 1\n\tprint 2\nelse\n\tprint 3\n\tprint 4", [("ifelse_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])], [("print_statement", [("integer_literal", 3)]), ("print_statement", [("integer_literal", 4)])])]),
+])
+def test_ifelse_statements(input_code, expected_output):
+    assert parse_code(input_code) == expected_output
+
+## While
+@pytest.mark.parametrize("input_code, expected_output", [
+    ("while true\n\tprint 1", [("while_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)])])]),
+    ("while true\n\tprint 1\n\tprint 2", [("while_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
 ])
 def test_while_statements(input_code, expected_output):
     assert parse_code(input_code) == expected_output
 
-# Break statements
+## Action
 @pytest.mark.parametrize("input_code, expected_output", [
-    ("stop\n", [('break_statement',)]),
-])
-def test_break_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Continue statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("skip\n", [('continue_statement',)]),
-])
-def test_continue_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Action statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("action x\n\t1", [('action_statement', 'x', [], [('integer_literal', 1)])]),
-    ("action x y\n\t1", [('action_statement', 'x', ['y'], [('integer_literal', 1)])]),
-    ("action x y z\n\t1", [('action_statement', 'x', ['y', 'z'], [('integer_literal', 1)])]),
-    ("action x\n\t1\n\taction y a b\n\t\t2\n\t\t3\n\t\taction z\n\t\t\t4\n\t5", [
-        ('action_statement', 'x', [], [
-            ('integer_literal', 1),
-            ('action_statement', 'y', ['a', 'b'], [
-                ('integer_literal', 2),
-                ('integer_literal', 3),
-                ('action_statement', 'z', [], [
-                    ('integer_literal', 4)
-                ])
-            ]),
-            ('integer_literal', 5)
-        ])
-    ]),
+    ("action func_name\n\tprint 1", [("action_statement", "func_name", [], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name\n\tprint 1\n\tprint 2", [("action_statement", "func_name", [], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
+    ("action func_name a\n\tprint 1", [("action_statement", "func_name", ['a'], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name a b\n\tprint 1", [("action_statement", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)])])]),
+    ("action func_name a b\n\tprint 1\n\tprint 2", [("action_statement", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
 ])
 def test_action_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Call statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("call x\n", [('call_statement', 'x', [])]),
-    ("call x y\n", [('call_statement', 'x', ['y'])]),
-    ("call x 1 z\n", [('call_statement', 'x', [('integer_literal', 1), 'z'])]),
-])
-def test_call_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Return statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("result\n", [('return_statement', [])]),
-    ("result 1\n", [('return_statement', [('integer_literal', 1)])]),
-    ("result 1 2\n", [('return_statement', [('integer_literal', 1), ('integer_literal', 2)])]),
-])
-def test_return_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Print statements
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("print\n", [('print_statement', [])]),
-    ("print 1\n", [('print_statement', [('integer_literal', 1)])]),
-    ("print 1 2\n", [('print_statement', [('integer_literal', 1), ('integer_literal', 2)])]),
-])
-def test_print_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-
-# Call assignement to variable
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("x is call y\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', []))]),
-    ("x is call y 1\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', [('integer_literal', 1)]))]),
-    ("x is call y 1 2\n", [('variable_declaration_statement', 'x', ('call_statement', 'y', [('integer_literal', 1), ('integer_literal', 2)]))]),
-])
-def test_call_assignment_to_variable(input_code, expected_output):
     assert parse_code(input_code) == expected_output
