@@ -179,7 +179,7 @@ def execute_statement(
 			output_callback(*[custom_repr(execute(expression)) for expression in next[0]]) # type: ignore
 
 		case "ask":
-			prompt = execute(next[0])
+			prompt = ' '.join([execute(expression) for expression in next[0]]) # type: ignore
 			return autocast(
 					input_callback(
 					prompt
