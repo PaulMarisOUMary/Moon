@@ -1,10 +1,10 @@
 <!-- https://shields.io/ -->
 ![GitHub is maintained](https://img.shields.io/maintenance/yes/2024?label=Maintained&color=success&logo=github)
 ![Tests](https://img.shields.io/github/actions/workflow/status/PaulMarisOUMary/Moon/pytest.yml?branch=main&label=Tests&logo=github)
-[![Moon Playground](https://img.shields.io/badge/Moon%20Playground-Try%20it%20online%20!-1b1aff?link=https%3A%2F%2Fmoon.warn.group)](https://moon.warn.group)
 
-![GitHub last release](https://img.shields.io/github/v/release/PaulMarisOUMary/Moon?label=Release&color=blueviolet&logo=github)
-![Github last prerelease](https://img.shields.io/github/v/release/PaulMarisOUMary/Moon?color=orange&include_prereleases&label=Pre-release&logo=github)
+[![Moon Playground](https://img.shields.io/badge/Moon%20Playground-Try%20it%20online%20!-1b1aff?link=https%3A%2F%2Fmoon.warn.group)](https://moon.warn.group)
+<!-- ![GitHub last release](https://img.shields.io/github/v/release/PaulMarisOUMary/Moon?label=Release&color=blueviolet&logo=github)
+![Github last prerelease](https://img.shields.io/github/v/release/PaulMarisOUMary/Moon?color=orange&include_prereleases&label=Pre-release&logo=github) -->
 ![GitHub last commit](https://img.shields.io/github/last-commit/PaulMarisOUMary/Moon?label=Last%20commit&color=informational&logo=github)
 ![Contributors](https://img.shields.io/github/contributors/PaulMarisOUMary/Moon?label=Contributors&color=informational&logo=github)
 
