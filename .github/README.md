@@ -48,7 +48,9 @@ Detailed technical specifications are available: [Technical Specifications](/doc
 
 Examples illustrating how the programming language works under the [Examples Folder](/examples/) of this repository.
 
+- [Fizz Buzz](/examples/fizz_buzz.mn)
 - [Guessing Game](/examples/guess_game.mn)
+- [Prime Numbers](/examples/is_prime.mn)
 
 ## Installation Guide
 
