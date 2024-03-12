@@ -1,0 +1,23 @@
+(
+    Prime Numbers
+    A prime number is a number greater
+    than 1 that cannot be evenly divided
+    by any number except 1 and itself.
+)
+
+action isPrime number
+	if number < 2
+        result false
+
+    divisor is 2
+    while divisor * divisor <= number
+        if number % divisor is 0
+            result false
+        divisor is divisor + 1
+
+    result true
+
+count is 0
+while count <= 25
+    print count "Is prime:" call isPrime count
+    count is count + 1
