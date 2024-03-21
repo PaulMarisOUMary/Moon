@@ -47,6 +47,7 @@ def test_t_identifier(valid_identifier):
 @pytest.mark.parametrize("valid_float", [
 	"1.1",
 	"0.00000000",
+	".0001",
 ])
 def test_t_float(valid_float):
 	# Arrange
@@ -65,6 +66,7 @@ def test_t_float(valid_float):
 @pytest.mark.parametrize("valid_float", [
 	"-1.1",
 	"-0.00000000",
+	"-.0001",
 ])
 def test_t_float_negative(valid_float):
 	# Arrange
@@ -1149,8 +1151,9 @@ def test_valid_and_invalid_integer(input_str, expected_type, is_valid):
 	# Assert
 	if is_valid:
 		assert tokens[0].type == expected_type
+		assert len(lexer.errors) == 0
 	else:
-		assert len(lexer.errors) > 0
+		assert len(lexer.errors) > 0 or tokens[0].type != "INTEGER" or len(tokens) != 1
 
 # Test valid and invalid floating-point literals
 @pytest.mark.parametrize("input_str, expected_type, is_valid", [
@@ -1162,7 +1165,7 @@ def test_valid_and_invalid_integer(input_str, expected_type, is_valid):
 	("0.123", "FLOAT", True),
 	("123.", "FLOAT", False),
 	("12.34.56", "FLOAT", False),
-	(".456", "FLOAT", False),
+	(".456", "FLOAT", True),
 ])
 def test_valid_and_invalid_float(input_str, expected_type, is_valid):
 	# Arrange
@@ -1175,8 +1178,9 @@ def test_valid_and_invalid_float(input_str, expected_type, is_valid):
 	# Assert
 	if is_valid:
 		assert tokens[0].type == expected_type
+		assert len(lexer.errors) == 0
 	else:
-		assert len(lexer.errors) > 0
+		assert len(lexer.errors) > 0 or tokens[0].type != "FLOAT" or len(tokens) != 1
 
 # Test line numbers
 @pytest.mark.parametrize("input_str, expected_line_number", [

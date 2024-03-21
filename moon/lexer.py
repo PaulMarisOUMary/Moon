@@ -93,13 +93,13 @@ def t_IDENTIFIER(t):
 
 # Floating-point literal rule
 def t_FLOAT(t):
-	r"-?\d+\.\d+"
+	r"[+-]?(?!0[0-9])[0-9]*[.][0-9]*\b"
 	t.value = float(t.value)
 	return t
 
 # Integer literal rule
 def t_INTEGER(t):
-	r"-?[1-9][0-9]*|0\b"
+	r"[+-]?(?!0[0-9])[0-9]+\b"
 	t.value = int(t.value)
 	return t
 
