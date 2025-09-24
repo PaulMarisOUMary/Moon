@@ -1,5 +1,1 @@
-. # Moon library
-
-# Development dependencies
-pytest
-ply
+ply>=3.11,<4

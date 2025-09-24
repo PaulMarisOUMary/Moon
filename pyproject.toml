@@ -1,0 +1,109 @@
+[build-system]
+requires = ["setuptools>=64", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "moon"
+description = "An interpreter for the Moon Programming Language."
+readme = { file = ".github/README.rst", content-type = "text/x-rst" }
+authors = [{ name = "PaulMarisOUMary" }]
+license = { file = "LICENSE" }
+keywords = [
+    "interpreter",
+    "programming language",
+]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Intended Audience :: Education",
+    "License :: CC BY-NC-SA 4.0",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+]
+requires-python = ">=3.10"
+dynamic = ["version", "dependencies"]
+
+[project.urls]
+Home = "https://github.com/PaulMarisOUMary/Moon"
+Repository = "https://github.com/PaulMarisOUMary/Moon"
+Issues = "https://github.com/PaulMarisOUMary/Moon/issues"
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.3.5,<8.4",
+    "pytest-cov>=5.0.0,<6",
+    "pytest-mock>=3.14,<3.15",
+]
+# dev = [
+#     "ruff>=0.13,<1",
+# ]
+# docs = [
+#     "sphinx>=8.2,<9",
+#     "sphinxawesome-theme",
+#     "sphinx-design",
+# ]
+
+[tool.setuptools.package-data]
+"moon" = ["py.typed"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["moon*"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = "requirements.txt" }
+
+[tool.setuptools_scm]
+local_scheme = "no-local-version"
+
+[tool.pyright]
+include = [
+    "moon/**",
+]
+exclude = [
+    ".git",
+    ".venv",
+    "**/__pycache__",
+    "build",
+    "dist",
+    "docs",
+]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+
+# [tool.ruff]
+# exclude = [
+#     ".eggs",
+#     ".git",
+#     ".mypy_cache",
+#     ".pytest_cache",
+#     ".ruff_cache",
+#     ".venv",
+#     ".vscode",
+#     "__pypackages__",
+#     "__pycache__",
+#     "build",
+#     "dist",
+#     "docs",
+# ]
+# line-length = 88
+# indent-width = 4
+
+# [tool.ruff.lint]
+# dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+# ignore = ["Q"]
+
+# [tool.ruff.format]
+# indent-style = "space"
+# line-ending = "auto"
+# quote-style = "preserve"

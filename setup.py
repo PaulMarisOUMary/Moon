@@ -1,29 +1,12 @@
+from os import environ
 from setuptools import setup
-import re
 
-VERSION = ''
-with open("moon/__init__.py") as f:
-    tmp = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE)
-    if tmp:
-        VERSION = tmp.group(1)
+ci_environment = environ.get("CI", "false").lower() == "true"
 
-if not VERSION:
-    raise RuntimeError("version is not set")
-
-PACKAGES = [
-    "moon"
-]
+local_scheme = "no-local-version" if ci_environment else "node-and-date"
 
 setup(
-    name="moon",
-    author="PaulMarisOUMary",
-    url="https://github.com/PaulMarisOUMary/Moon",
-    project_urls=
-    {
-        "Issue tracker": "https://github.com/PaulMarisOUMary/Moon/issues"
-    },
-    version=VERSION,
-    packages=PACKAGES,
-    license="CC BY-NC-SA 4.0",
-    description="An interpreter for the Moon Programming Language",
+    use_scm_version={
+        "local_scheme": local_scheme,
+    }
 )
