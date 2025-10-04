@@ -14,8 +14,6 @@ except PackageNotFoundError:
 __path__ = extend_path(__path__, __name__)
 
 
-from .main import main
-
 from .lexer import build_lexer, tokens, print_tokens
 from .parser import build_parser
 from .interpreter import execute_program

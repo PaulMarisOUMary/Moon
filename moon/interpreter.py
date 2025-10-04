@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 # Interpreter types
 TStatement = Tuple[Any]
@@ -199,8 +199,10 @@ def execute_program(
 		statement_callback: TStatementCallback = None,
 		output_callback: TOutputCallback = print,
 		input_callback: TInputCallback = input,
+		environment: Optional[TEnvironment] = None,
 	) -> None:
-	environment = dict()
+	if environment is None:
+		environment = dict()
 
 	if not program:
 		raise ValueError("No instruction")
