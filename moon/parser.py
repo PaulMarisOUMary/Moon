@@ -77,6 +77,34 @@ def p_list_composite(p: TYP):
 
 	p[0] = ("list_composite", p[2] if not p[2] == '\n' else [])
 
+def p_dict_entry(p: TYP):
+    """dict_entry : dict_key IS expression NEWLINE"""
+    p[0] = (p[1], p[3])
+
+def p_dict_key(p: TYP):
+    """dict_key : IDENTIFIER"""
+    p[0] = p[1]
+
+def p_dict_suite(p: TYP):
+    """dict_suite : NEWLINE INDENT dict_entries DEDENT"""
+    p[0] = p[3]
+
+def p_dict_entries(p: TYP):
+    """dict_entries : dict_entries dict_entry
+                    | dict_entry"""
+    if len(p) == 3:
+        p[0] = p[1] + [p[2]]
+    else:
+        p[0] = [p[1]]
+
+def p_dict_composite(p: TYP):
+    """dict_composite : DICT dict_suite
+                      | DICT NEWLINE"""
+    if len(p) == 3 and isinstance(p[2], list):
+        p[0] = ("dict_composite", dict(p[2]))
+    else:
+        p[0] = ("dict_composite", {})
+
 # Statement
 
 def p_statement(p: TYP):
@@ -89,7 +117,8 @@ def p_statement(p: TYP):
 				 | ifelse_statements
 				 | while_statements
 				 | action_statements
-				 | list_composite"""
+				 | list_composite
+				 | dict_composite"""
 	p[0] = p[1]
 
 def p_optional_inline_args(p: TYP):
@@ -192,19 +221,19 @@ def p_integer_literal(p: TYP):
 	"""integer_literal : INTEGER"""
 	p[0] = ("integer_literal", p[1])
 
-def p_integer_float(p: TYP):
+def p_float_literal(p: TYP):
 	"""float_literal : FLOAT"""
 	p[0] = ("float_literal", p[1])
 
-def p_integer_string(p: TYP):
+def p_string_literal(p: TYP):
 	"""string_literal : STRING"""
 	p[0] = ("string_literal", p[1])
 
-def p_integer_boolean(p: TYP):
+def p_boolean_literal(p: TYP):
 	"""boolean_literal : BOOLEAN"""
 	p[0] = ("boolean_literal", p[1])
 
-def p_integer_null(p: TYP):
+def p_null_literal(p: TYP):
 	"""null_literal : NULL"""
 	p[0] = ("null_literal",)
 
