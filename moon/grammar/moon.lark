@@ -1,0 +1,216 @@
+single_input: _NEWLINE | simple_statement | compound_statement _NEWLINE
+file_input: (_NEWLINE | statement)*
+eval_input: expression _NEWLINE*
+
+// Statements
+
+?statement: simple_statement | compound_statement
+
+// Inline Statements
+
+?simple_statement: single_statement _NEWLINE
+?single_statement: ( expression | assign_statement | stop_statement | skip_statement | result_statement | noop_statement | use_statement )
+assign_statement: IDENTIFIER IS expression
+use_statement: use_name | use_from
+use_from: FROM (ESCAPED_STRING | IDENTIFIER) use_name
+use_name: USE (IDENTIFIER (use_as)?)+
+use_as: AS IDENTIFIER
+dots: DOT+
+stop_statement: STOP
+skip_statement: SKIP
+result_statement: RESULT [expression]
+noop_statement: ELLIPSIS
+
+// Compound Statements
+
+?compound_statement: action_statement | thing_statement | while_statement | if_statement | test_statement
+suite: simple_statement | _NEWLINE _INDENT statement+ _DEDENT
+thing_suite: simple_statement | _NEWLINE _INDENT (statement | attribute)+ _DEDENT
+
+action_statement: ACTION IDENTIFIER parameters suite
+parameters: IDENTIFIER*
+
+thing_statement: THING IDENTIFIER [inheritance] thing_suite
+inheritance: IS IDENTIFIER
+attribute: HAS IDENTIFIER _NEWLINE
+
+while_statement: WHILE expression suite
+if_statement: IF expression suite [ELSE suite]
+// if_statement: IF expression suite elifs [ELSE suite] // Alternative idea
+// elifs: elif_*
+// elif_: ELIF expression suite
+test_statement: TEST suite [FAIL suite]
+
+// Expressions
+
+?expression: or_expr (IF or_expr ELSE expression)?
+
+?or_expr: and_expr (OR and_expr)*
+?and_expr: not_expr_ (AND not_expr_)*
+?not_expr_: NOT not_expr_ -> not_expr
+          | comp_expr
+?comp_expr: expr (comp_operator expr)*
+
+?expr: arith_expr
+?arith_expr: term (add_operator term)*
+?term: factor (mul_operator factor)*
+?factor: unary_operator factor | power
+
+!unary_operator: PLUS|MINUS
+!add_operator: PLUS|MINUS
+!mul_operator: MULTIPLY|DIVIDE|MODULO|FLOOR
+!comp_operator: LT|GT|GTE|LTE|IS|ISNT
+
+?power: atom (POWER factor)?
+
+?atom: NULL
+     | TRUE
+     | FALSE
+     | SIGNED_INTEGER
+     | SIGNED_FLOAT
+     | ESCAPED_STRING
+     | IDENTIFIER -> var
+     // | list
+     // | dict
+
+%declare _INDENT _DEDENT
+
+%ignore WS
+%ignore LINE_CONT
+%ignore COMMENT
+%ignore BLOCK_COMMENT
+
+// Newlines and Whitespace
+
+_NEWLINE: ( /\r?\n[\t ]*/ | COMMENT )+
+
+WS: /[\t \f]+/
+LINE_CONT: /\\[\t \f]*\r?\n/
+
+// Comments
+
+BLOCK_COMMENT: /\([\s\S]*?\)/
+// BLOCK_COMMENT: /#\([\s\S]*?\)#/ // Alternative idea
+COMMENT: /#[^\n]*/
+// COMMENT: /#[^\r\n]*(?=\r?\n|$)/ // Alternative idea
+
+// Punctuation
+
+ELLIPSIS: "..."
+DOT: "."
+
+// Primitives
+
+NULL: "null"
+TRUE: "true"
+FALSE: "false"
+// BOOLEAN: TRUE | FALSE
+
+// Numbers
+
+DIGIT: /[0-9]/
+HEXDIGIT: /[0-9a-fA-F]/
+
+INTEGER: DIGIT+
+SIGNED_INTEGER: [PLUS|MINUS] INTEGER
+
+DECIMAL: DIGIT+ "." DIGIT* | "." DIGIT+
+EXP: /[eE][+-]?[0-9]+/
+
+FLOAT: INTEGER EXP | DECIMAL [EXP]
+SIGNED_FLOAT: [PLUS|MINUS] FLOAT
+
+// Strings
+
+_STRING_INNER: /.*?/
+_STRING_ESC_INNER: _STRING_INNER /(?<!\\)(\\\\)*?/
+
+DOUBLE_QUOTED_STRING: "\"" _STRING_ESC_INNER "\""
+SINGLE_QUOTED_STRING: "'" _STRING_ESC_INNER "'"
+
+ESCAPED_STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING
+
+// Composites
+
+LIST: "list"
+DICT: "dict"
+
+// Identifiers
+
+NAME: /[^\W\d]\w*/
+// NAME: /[a-zA-Z_][a-zA-Z0-9_]*/ // Alternative idea
+EMOJI: /[\U0000231A-\U0001FAFF]/
+// EMOJIS: /(\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g // Alternative idea
+IDENTIFIER: NAME | EMOJI
+
+// Operators
+
+PLUS: "+"
+MINUS: "-"
+MULTIPLY: "*"
+DIVIDE: "/"
+FLOOR: "//"
+MODULO: "%"
+POWER: "**"
+
+LT: "<"
+LTE: "<="
+GT: ">"
+GTE: ">="
+IS: "is"
+ISNT: "isnt"
+
+AND: "and"
+OR: "or"
+NOT: "not"
+
+// Things
+
+THING: "thing"
+HAS: "has"
+
+// Actions
+
+ACTION: "action"
+RESULT: "result"
+CALL: "call"
+
+// Imports
+
+FROM: "from"
+USE: "use"
+AS: "as"
+
+// Control Flow
+
+IF: "if"
+ELSE: "else"
+
+// Loops
+
+WHILE: "while"
+STOP: "stop"
+SKIP: "skip"
+
+// Testing
+
+TEST: "test"
+FAIL: "fail"
+
+// Reserved Keywords (yet unused)
+
+ASSERT: "assert"
+ASYNC: "async"
+AWAIT: "await"
+DEFAULT: "default"
+ELIF: "elif"
+END: "end"
+ERROR: "error"
+FOR: "for"
+GLOBAL: "global"
+IN: "in"
+LAMBDA: "lambda"
+NOTHING: "nothing"
+PASS: "pass"
+RAISE: "raise"
+YIELD: "yield"
