@@ -33,6 +33,7 @@ dynamic = ["version", "dependencies"]
 Home = "https://github.com/PaulMarisOUMary/Moon"
 Repository = "https://github.com/PaulMarisOUMary/Moon"
 Issues = "https://github.com/PaulMarisOUMary/Moon/issues"
+Changelog = "https://github.com/PaulMarisOUMary/Moon/releases"
 
 [project.scripts]
 moon = "moon.cli:cli"
@@ -110,3 +111,9 @@ python_files = ["test_*.py"]
 # indent-style = "space"
 # line-ending = "auto"
 # quote-style = "preserve"
+
+# [tool.ty.environment]
+# python-platform = "all"
+
+[tool.bandit.assert_used]
+skips = ["*_test.py", "*/test_*.py"]

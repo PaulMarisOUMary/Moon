@@ -1,4 +1,8 @@
 {
+    "bandit.args": [
+        "-c",
+        "${workspaceFolder}\\pyproject.toml"
+    ],
     "python.testing.pytestArgs": [
         "tests"
     ],

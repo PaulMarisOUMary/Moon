@@ -1,6 +1,8 @@
+from logging import NullHandler, getLogger
 from importlib.metadata import version, PackageNotFoundError
 from pkgutil import extend_path
 
+from .parser import build_parser
 
 __title__ = "moon"
 __author__ = "PaulMarisOUMary"
@@ -14,6 +16,8 @@ except PackageNotFoundError:
 __path__ = extend_path(__path__, __name__)
 
 
-from .lexer import build_lexer, tokens, print_tokens
-from .parser import build_parser
-from .interpreter import execute_program
+__all__ = [
+    "build_parser",
+]
+
+getLogger(__name__).addHandler(NullHandler())
