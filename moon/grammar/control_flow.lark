@@ -1,0 +1,79 @@
+// control_flow.lark
+
+
+
+%import .modules (identifier, expression, use_statement)
+%import .modules (IS, STOP, SKIP, RESULT, ELLIPSIS, RAISE, ERROR)
+%import .modules (IF, ELSE, ELIF, WHILE, TEST, FAIL)
+%import .modules (ACTION, THING, HAS)
+%import .modules (_NEWLINE, _INDENT, _DEDENT)
+%import .modules (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+
+// Statement entry point
+?statement: simple_statement | compound_statement
+
+// Simple statement
+?simple_statement: single_statement _NEWLINE
+
+?single_statement: expression
+                  | assign_statement
+                  | stop_statement
+                  | skip_statement
+                  | result_statement
+                  | noop_statement
+                  | use_statement
+                  | raise_statement
+
+// Assignment
+assign_statement: identifier IS expression
+
+// Loops skip & stop
+stop_statement: STOP
+skip_statement: SKIP
+
+// Function return
+result_statement: RESULT [expression]
+
+// No-op
+noop_statement: ELLIPSIS
+
+// Manual error raising
+raise_statement: RAISE expression
+               | ERROR expression -> raise_statement
+
+// Suite block
+suite: simple_statement | _NEWLINE _INDENT statement+ _DEDENT
+
+// Compound statement entry point
+?compound_statement: action_statement
+                    | thing_statement
+                    | while_statement
+                    | if_statement
+                    | test_statement
+
+// Conditionals
+if_statement: IF expression suite elif_branch* [ELSE suite]
+
+elif_branch: ELIF expression suite
+
+// Loops
+while_statement: WHILE expression suite
+
+// Error handling test & fail
+test_statement: TEST suite [FAIL suite]
+
+// Functions
+action_statement: ACTION identifier parameters suite
+
+parameters: identifier*
+
+// Classes
+thing_statement: THING identifier [inheritance] thing_suite
+
+thing_suite: simple_statement | _NEWLINE _INDENT (statement | attribute)+ _DEDENT
+
+// Inheritance
+inheritance: IS identifier
+
+// Properties
+attribute: HAS identifier _NEWLINE

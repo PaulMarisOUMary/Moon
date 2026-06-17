@@ -1,0 +1,76 @@
+// expressions.lark
+
+
+
+%import .literals (literal, identifier)
+%import .literals (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
+%import .literals (LT, LTE, GT, GTE, IS, ISNT)
+%import .literals (AND, OR, NOT)
+%import .literals (IF, ELSE, ELIF)
+%import .literals (LIST, DICT, CALL)
+%import .literals (PRINT, ASK, RANDOM, TIME, SLEEP)
+%import .literals (STOP, SKIP, RESULT, ELLIPSIS, RAISE, ERROR)
+%import .literals (WHILE, TEST, FAIL)
+%import .literals (ACTION, THING, HAS)
+%import .literals (FROM, USE, AS, DOT)
+%import .literals (ESCAPED_STRING)
+%import .literals (_NEWLINE, _INDENT, _DEDENT)
+%import .literals (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+
+// Expression entry point
+?expression: or_expr (IF or_expr ELSE expression)?
+
+// Logical expressions
+?or_expr: and_expr (OR and_expr)*
+?and_expr: not_expr_ (AND not_expr_)*
+?not_expr_: NOT not_expr_ -> not_expr
+          | comp_expr
+
+// Relational expressions
+?comp_expr: expr (comp_operator expr)*
+
+!comp_operator: LT | GT | GTE | LTE | IS | ISNT
+
+// Arithmetic expressions
+?expr: arith_expr
+?arith_expr: term (add_operator term)*
+?term: factor (mul_operator factor)*
+?factor: unary_operator factor | power
+
+!unary_operator: PLUS | MINUS
+!add_operator: PLUS | MINUS
+!mul_operator: MULTIPLY | DIVIDE | MODULO | FLOOR
+
+?power: atom (POWER factor)?
+
+// Atoms
+?atom: literal
+     | identifier -> var
+     | list_expr
+     | dict_expr
+     | call_expr
+     | builtin_call
+     | method_call
+
+// Function call
+call_expr: CALL identifier arguments
+
+arguments: expression*
+
+// Builtin functions
+builtin_call: builtin_name arguments
+
+!builtin_name: PRINT | ASK | RANDOM | TIME | SLEEP
+
+// Direct method call
+method_call: identifier identifier arguments
+
+list_expr: LIST _NEWLINE _INDENT list_item+ _DEDENT
+         | LIST -> empty_list_expr
+
+list_item: expression _NEWLINE
+
+dict_expr: DICT _NEWLINE _INDENT dict_item+ _DEDENT
+         | DICT -> empty_dict_expr
+
+dict_item: expression IS expression _NEWLINE

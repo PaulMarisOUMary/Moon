@@ -1,240 +1,255 @@
 import pytest
 
-from moon.lexer import build_lexer
-from moon.parser import build_parser
+from functools import wraps
+from typing import Any, Callable
 
-def parse_code(code):
-    lexer = build_lexer()
-    lexer.input(code)
+from lark import Lark, Token, Tree
 
-    parser = build_parser()
-    return parser.parse(code+'\n', lexer=lexer)
+from .utils import clean_type
 
-# Literals
 
-## Integer
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("0", [("integer_literal", 0)]),
-    ("4096", [("integer_literal", 4096)]),
-])
-def test_integer_literal(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-## Float
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("0.0001", [("float_literal", 0.0001)]),
-    ("1.4096", [("float_literal", 1.4096)]),
-    ("-4.4096", [("float_literal", -4.4096)]),
-])
-def test_float_literal(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-## String
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("\"Hello World\"", [("string_literal", "Hello World")]),
-    ("'Hello World'", [("string_literal", "Hello World")]),
-])
-def test_string_literal(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-## Boolean
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("true", [("boolean_literal", True)]),
-    ("false", [("boolean_literal", False)]),
-])
-def test_boolean_literal(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
-## Null
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("null", [("null_literal",)]),
-])
-def test_null_literal(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+def ast_to_str(node: Tree | Token | None, is_root: bool = False) -> str:
+    if node is None:
+        return ''
 
-# Composite
+    if isinstance(node, Tree):
+        rule_name = clean_type(node.data)
+        children_strs = [
+            ast_to_str(child)
+            for child in node.children
+            if child is not None
+        ]
 
-## Lists
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("list", [("list_composite", [])]),
-    ("list\n\t0", [("list_composite", [("integer_literal", 0)])]),
-    ("list\n\t1\n\t2\n\t3\n\t4\n\t5\n\tlist\n\t\t'a'\n\t\t'b'\n\t\tlist\n\t\t\ttrue\n\t\t\tfalse\n\t\t'c'\n\t\t'd'", [
-        ("list_composite", [
-            ("integer_literal", 1),
-            ("integer_literal", 2),
-            ("integer_literal", 3),
-            ("integer_literal", 4),
-            ("integer_literal", 5),
-            ("list_composite", [
-                ("string_literal", 'a'),
-                ("string_literal", 'b'),
-                ("list_composite", [
-                    ("boolean_literal", True),
-                    ("boolean_literal", False)
-                ]),
-                ("string_literal", 'c'),
-                ("string_literal", 'd')
-            ])
-        ])
-    ]),
-])
-def test_composite_lists(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+        ENTRYPOINTS = {"start", "file_input", "single_input", "eval_input"}
+        if is_root and rule_name in ENTRYPOINTS:
+            return ", ".join(children_strs)
 
-## Dict
+        if not children_strs:
+            return rule_name
 
-# Expressions
+        return f"{rule_name}({', '.join(children_strs)})"
 
-## Arithmetic
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("1 + 2", [("arithmetic_expression", '+', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 - 2", [("arithmetic_expression", '-', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 * 2", [("arithmetic_expression", '*', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 / 2", [("arithmetic_expression", '/', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 % 2", [("arithmetic_expression", '%', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 ** 2", [("arithmetic_expression", "**", ("integer_literal", 1), ("integer_literal", 2))]),
-])
-def test_arithmetic_expression(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+    if isinstance(node, Token):
+        return str(node.value)
 
-## Comparison
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("1 < 2", [("comparison_expression", '<', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 <= 2", [("comparison_expression", "<=", ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 > 2", [("comparison_expression", '>', ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 >= 2", [("comparison_expression", ">=", ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 is 2", [("comparison_expression", "==", ("integer_literal", 1), ("integer_literal", 2))]),
-    ("1 isnt 2", [("comparison_expression", "!=", ("integer_literal", 1), ("integer_literal", 2))]),
-])
-def test_comparison_expression(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+    return str(node)
 
-## Logical
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("true and false", [("logical_expression", "and", ("boolean_literal", True), ("boolean_literal", False))]),
-    ("true or false", [("logical_expression", "or", ("boolean_literal", True), ("boolean_literal", False))]),
-    ("not true", [("logical_expression", "not", ("boolean_literal", True))]),
-])
-def test_logical_expression(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
 
-## Call
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("call func_name", [("call", "func_name", [])]),
-    ("call func_name 1 2 3 4", [("call", "func_name", [("integer_literal", 1), ("integer_literal", 2), ("integer_literal", 3), ("integer_literal", 4)])]),
-])
-def test_call(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+def assert_ast_structure(start: str = "file_input") -> Callable[..., Any]:
+    def decorator(func: Callable[..., None]) -> Callable[..., None]:
+        @wraps(func)
+        def wrapper(moon_parser: Lark, source: str, *args: Any, **kwargs: Any) -> None:
+            expected_ast: str = kwargs.get("expected_ast", args[0] if args else None)
+            
+            if expected_ast is None:
+                raise ValueError(f"Test for source '{source}' did not provide an 'expected_ast'.")
 
-## Ask
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("ask", [("ask", [])]),
-    ("ask 'prompt'", [("ask", [("string_literal", "prompt")])]),
-    ("ask 'prompt' 'prompt 2'", [("ask", [("string_literal", "prompt"), ("string_literal", "prompt 2")])]),
-])
-def test_ask(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+            tree: Tree = moon_parser.parse(source, start=start)
+            actual_ast = ast_to_str(tree, is_root=True)
 
-# Statement
+            assert actual_ast == expected_ast, (
+                f"\nIncorrect AST structure for '{source}' (start='{start}')\n"
+                f"Expected : {expected_ast}\n"
+                f"Got      : {actual_ast}"
+            )
 
-## Variable Assignment
-@pytest.mark.parametrize("input_code, expected_output", [
-    # Literals assignment
-    ("var is null", [("variable_declaration_statement", "var", ("null_literal",))]),
-    ("var is false", [("variable_declaration_statement", "var", ("boolean_literal", False))]),
-    ("var is true", [("variable_declaration_statement", "var", ("boolean_literal", True))]),
-    ("var is 1", [("variable_declaration_statement", "var", ("integer_literal", 1))]),
-    ("var is 1.1", [("variable_declaration_statement", "var", ("float_literal", 1.1))]),
-    ("var is 'str'", [("variable_declaration_statement", "var", ("string_literal", "str"))]),
-    # Arithmetic
-    ("var is 1 + 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '+', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 - 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '-', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 * 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '*', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 / 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '/', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 % 2", [("variable_declaration_statement", "var", ("arithmetic_expression", '%', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 ** 2", [("variable_declaration_statement", "var", ("arithmetic_expression", "**", ("integer_literal", 1), ("integer_literal", 2)))]),
-    # Comparison
-    ("var is 1 < 2", [("variable_declaration_statement", "var", ("comparison_expression", '<', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 <= 2", [("variable_declaration_statement", "var", ("comparison_expression", "<=", ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 > 2", [("variable_declaration_statement", "var", ("comparison_expression", '>', ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 >= 2", [("variable_declaration_statement", "var", ("comparison_expression", ">=", ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 is 2", [("variable_declaration_statement", "var", ("comparison_expression", "==", ("integer_literal", 1), ("integer_literal", 2)))]),
-    ("var is 1 isnt 2", [("variable_declaration_statement", "var", ("comparison_expression", "!=", ("integer_literal", 1), ("integer_literal", 2)))]),
-    # Logical
-    ("var is true and false", [("variable_declaration_statement", "var", ("logical_expression", "and", ("boolean_literal", True), ("boolean_literal", False)))]),
-    ("var is true or false", [("variable_declaration_statement", "var", ("logical_expression", "or", ("boolean_literal", True), ("boolean_literal", False)))]),
-    ("var is not true", [("variable_declaration_statement", "var", ("logical_expression", "not", ("boolean_literal", True)))]),
-    # Call
-    ("var is call func_name", [("variable_declaration_statement", "var", ("call", "func_name", []))]),
-    ("var is call func_name 1 2", [("variable_declaration_statement", "var", ("call", "func_name", [("integer_literal", 1), ("integer_literal", 2)]))]),
-    # Ask
-    ("var is ask", [("variable_declaration_statement", "var", ("ask", []))]),
-    ("var is ask 'prompt'", [("variable_declaration_statement", "var", ("ask", [("string_literal", "prompt")]))]),
-    ("var is ask 'prompt' 'prompt 2'", [("variable_declaration_statement", "var", ("ask", [("string_literal", "prompt"), ("string_literal", "prompt 2")]))]),
-])
-def test_variable_declaration_statement(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+            return func(moon_parser, source, *args, **kwargs)
+        return wrapper
+    return decorator
 
-## Stop
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("stop", [("stop_statement",)]),
-])
-def test_stop_statement(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
 
-## Skip
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("skip", [("skip_statement",)]),
-])
-def test_skip_statement(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+VALID_FILE_INPUT = (
+    ('', ''),
+    ('\n', ''),
+    ("\n\n", ''),
+    ('\t', ''),
+    ("\t\t", ''),
+    ("\t\n", ''),
+    ("\t\t\n", ''),
+)
+@pytest.mark.parametrize("source, expected_ast", [*VALID_FILE_INPUT])
+@assert_ast_structure("file_input")
+def test_parser_valid_file_input(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
 
-## Result
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("result", [("result_statement", [])]),
-    ("result 1", [("result_statement", [("integer_literal", 1)])]),
-    ("result 1 2", [("result_statement", [("integer_literal", 1), ("integer_literal", 2)])]),
-])
-def test_result_statement(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+BOOLEAN_AND_NULL_LITERAL = (
+    ("true", "true_literal"),
+    ("false", "false_literal"),
+    ("null", "null_literal"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*BOOLEAN_AND_NULL_LITERAL])
+@assert_ast_structure("eval_input")
+def test_parser_boolean_and_null(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
 
-## Print
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("print", [("print_statement", [])]),
-    ("print 1", [("print_statement", [("integer_literal", 1)])]),
-    ("print 1 2", [("print_statement", [("integer_literal", 1), ("integer_literal", 2)])]),
-])
-def test_print_statement(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
 
-# Statements
+INTEGER_LITERAL = (
+    ('0', "integer_literal(0)"),
+    ('1', "integer_literal(1)"),
+    ("42", "integer_literal(42)"),
+    ("4096", "integer_literal(4096)"),
+    ('-0', "integer_literal(-0)"),
+    ('-1', "integer_literal(-1)"),
+    ("-42", "integer_literal(-42)"),
+    ("-4096", "integer_literal(-4096)"),
+    ('+0', "integer_literal(+0)"),
+    ('+1', "integer_literal(+1)"),
+    ("+42", "integer_literal(+42)"),
+    ("+4096", "integer_literal(+4096)"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*INTEGER_LITERAL])
+@assert_ast_structure("eval_input")
+def test_parser_integer_literal(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
 
-## If
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\tprint 1", [("ifelse_statements", ("boolean_literal", True), [("print_statement",[("integer_literal", 1)])], None)]),
-    ("if true\n\tprint 1\n\tprint 2", [("ifelse_statements", ("boolean_literal", True), [("print_statement",[("integer_literal", 1)]), ("print_statement",[("integer_literal", 2)])], None)]),
-])
-def test_if_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
 
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("if true\n\tprint 1\nelse\n\tprint 2", [("ifelse_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)])], [("print_statement", [("integer_literal", 2)])])]),
-    ("if true\n\tprint 1\n\tprint 2\nelse\n\tprint 3\n\tprint 4", [("ifelse_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])], [("print_statement", [("integer_literal", 3)]), ("print_statement", [("integer_literal", 4)])])]),
-])
-def test_ifelse_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+FLOAT_LITERAL = (
+    ("0.0", "float_literal(0.0)"),
+    ("0.00000000", "float_literal(0.00000000)"),
+    ("1.1", "float_literal(1.1)"),
+    (".0001", "float_literal(.0001)"),
+    ("1e10", "float_literal(1e10)"),
+    ("1E10", "float_literal(1E10)"),
+    ("1e-10", "float_literal(1e-10)"),
+    ("1E-10", "float_literal(1E-10)"),
+    ("1e+10", "float_literal(1e+10)"),
+    ("1E+10", "float_literal(1E+10)"),
+    (".1e10", "float_literal(.1e10)"),
+    (".1E10", "float_literal(.1E10)"),
+    (".1e-10", "float_literal(.1e-10)"),
+    (".1E-10", "float_literal(.1E-10)"),
+    (".1e+10", "float_literal(.1e+10)"),
+    (".1E+10", "float_literal(.1E+10)"),
+    ("-0.0", "float_literal(-0.0)"),
+    ("-0.00000000", "float_literal(-0.00000000)"),
+    ("-1.1", "float_literal(-1.1)"),
+    ("-.0001", "float_literal(-.0001)"),
+    ("-1e10", "float_literal(-1e10)"),
+    ("-1E10", "float_literal(-1E10)"),
+    ("-1e-10", "float_literal(-1e-10)"),
+    ("-1E-10", "float_literal(-1E-10)"),
+    ("-1e+10", "float_literal(-1e+10)"),
+    ("-1E+10", "float_literal(-1E+10)"),
+    ("-.1e10", "float_literal(-.1e10)"),
+    ("-.1E10", "float_literal(-.1E10)"),
+    ("-.1e-10", "float_literal(-.1e-10)"),
+    ("-.1E-10", "float_literal(-.1E-10)"),
+    ("-.1e+10", "float_literal(-.1e+10)"),
+    ("-.1E+10", "float_literal(-.1E+10)"),
+    ("+0.0", "float_literal(+0.0)"),
+    ("+0.00000000", "float_literal(+0.00000000)"),
+    ("+1.1", "float_literal(+1.1)"),
+    ("+.0001", "float_literal(+.0001)"),
+    ("+1e10", "float_literal(+1e10)"),
+    ("+1E10", "float_literal(+1E10)"),
+    ("+1e-10", "float_literal(+1e-10)"),
+    ("+1E-10", "float_literal(+1E-10)"),
+    ("+1e+10", "float_literal(+1e+10)"),
+    ("+1E+10", "float_literal(+1E+10)"),
+    ("+.1e10", "float_literal(+.1e10)"),
+    ("+.1E10", "float_literal(+.1E10)"),
+    ("+.1e-10", "float_literal(+.1e-10)"),
+    ("+.1E-10", "float_literal(+.1E-10)"),
+    ("+.1e+10", "float_literal(+.1e+10)"),
+    ("+.1E+10", "float_literal(+.1E+10)"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*FLOAT_LITERAL])
+@assert_ast_structure("eval_input")
+def test_parser_float_literal(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
 
-## While
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("while true\n\tprint 1", [("while_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)])])]),
-    ("while true\n\tprint 1\n\tprint 2", [("while_statements", ("boolean_literal", True), [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
-])
-def test_while_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
 
-## Action
-@pytest.mark.parametrize("input_code, expected_output", [
-    ("action func_name\n\tprint 1", [("action_statements", "func_name", [], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name\n\tprint 1\n\tprint 2", [("action_statements", "func_name", [], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
-    ("action func_name a\n\tprint 1", [("action_statements", "func_name", ['a'], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name a b\n\tprint 1", [("action_statements", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)])])]),
-    ("action func_name a b\n\tprint 1\n\tprint 2", [("action_statements", "func_name", ['a', 'b'], [("print_statement", [("integer_literal", 1)]), ("print_statement", [("integer_literal", 2)])])]),
-])
-def test_action_statements(input_code, expected_output):
-    assert parse_code(input_code) == expected_output
+STRING_LITERAL = (
+    ('"string"', 'string_literal("string")'),
+    ('""', 'string_literal("")'),
+    ('"string with spaces"', 'string_literal("string with spaces")'),
+    ('"string with (parens) {} []"', 'string_literal("string with (parens) {} []")'),
+    ('"string with \\"quotes\\""', 'string_literal("string with \\"quotes\\"")'),
+    ('"string with \\\\ backslash"', 'string_literal("string with \\\\ backslash")'),
+    ('"string with \\n new line"', 'string_literal("string with \\n new line")'),
+    ('"string with \\t tabulation"', 'string_literal("string with \\t tabulation")'),
+    ('"string with \\u2600 unicode"', 'string_literal("string with \\u2600 unicode")'),
+    ('"emoji 🍎"', 'string_literal("emoji 🍎")'),
+
+    ("'string'", "string_literal('string')"),
+    ("'string\\\\'", "string_literal('string\\\\')"),
+    ("''", "string_literal('')"),
+    ("'string with spaces'", "string_literal('string with spaces')"),
+    ("'string with (parens) {} []'", "string_literal('string with (parens) {} []')"),
+    ("'string with \\'quotes\\''", "string_literal('string with \\'quotes\\'')"),
+    ("'string with \\\\ backslash'", "string_literal('string with \\\\ backslash')"),
+    ("'string with \\n new line'", "string_literal('string with \\n new line')"),
+    ("'string with \\t tabulation'", "string_literal('string with \\t tabulation')"),
+    ("'string with \\u2600 unicode'", "string_literal('string with \\u2600 unicode')"),
+    ("'emoji 🍎'", "string_literal('emoji 🍎')"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*STRING_LITERAL])
+@assert_ast_structure("eval_input")
+def test_parser_string_literal(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
+
+
+IDENTIFIER = (
+    ('🍎', "var(identifier(🍎))"),
+    ("apple", "var(identifier(apple))"),
+    ("display_name", "var(identifier(display_name))"),
+    ("Data_1", "var(identifier(Data_1))"),
+    ("x", "var(identifier(x))"),
+    ("X", "var(identifier(X))"),
+    ("__private", "var(identifier(__private))"),
+    ("A1234567890", "var(identifier(A1234567890))"),
+    ("__init__", "var(identifier(__init__))"),
+    ("a_", "var(identifier(a_))"),
+    ("a_" * 50, f"var(identifier({'a_' * 50}))"),
+    ('🧠', "var(identifier(🧠))"),
+    ("truefalse", "var(identifier(truefalse))"),
+    ("null0", "var(identifier(null0))"),
+    ("action1", "var(identifier(action1))"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*IDENTIFIER])
+@assert_ast_structure("eval_input")
+def test_parser_identifier(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
+
+
+ARITHMETIC_EXPRESSIONS = (
+    ("1 + 2", "arith_expr(integer_literal(1), add_operator(+), integer_literal(2))"),
+    ("1 - 2", "arith_expr(integer_literal(1), add_operator(-), integer_literal(2))"),
+    ("1 * 2", "term(integer_literal(1), mul_operator(*), integer_literal(2))"),
+    ("1 / 2", "term(integer_literal(1), mul_operator(/), integer_literal(2))"),
+    ("1 // 2", "term(integer_literal(1), mul_operator(//), integer_literal(2))"),
+    ("1 % 2", "term(integer_literal(1), mul_operator(%), integer_literal(2))"),
+    ("1 ** 2", "power(integer_literal(1), **, integer_literal(2))"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*ARITHMETIC_EXPRESSIONS])
+@assert_ast_structure("eval_input")
+def test_parser_arithmetic_expressions(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
+
+
+RELATIONAL_EXPRESSIONS = (
+    ("1 < 2", "comp_expr(integer_literal(1), comp_operator(<), integer_literal(2))"),
+    ("1 <= 2", "comp_expr(integer_literal(1), comp_operator(<=), integer_literal(2))"),
+    ("1 > 2", "comp_expr(integer_literal(1), comp_operator(>), integer_literal(2))"),
+    ("1 >= 2", "comp_expr(integer_literal(1), comp_operator(>=), integer_literal(2))"),
+    ("1 is 2", "comp_expr(integer_literal(1), comp_operator(is), integer_literal(2))"),
+    ("1 isnt 2", "comp_expr(integer_literal(1), comp_operator(isnt), integer_literal(2))"),
+    ("false and true", "and_expr(false_literal, and, true_literal)"),
+    ("false or true", "or_expr(false_literal, or, true_literal)"),
+    ("not true", "not_expr(not, true_literal)"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*RELATIONAL_EXPRESSIONS])
+@assert_ast_structure("eval_input")
+def test_parser_relational_expressions(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
+
+
+TERNARY_EXPRESSIONS = (
+    ("x if true else y", "expression(var(identifier(x)), if, true_literal, else, var(identifier(y)))"),
+    ("x if a else y if b else z", "expression(var(identifier(x)), if, var(identifier(a)), else, expression(var(identifier(y)), if, var(identifier(b)), else, var(identifier(z))))"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*TERNARY_EXPRESSIONS])
+@assert_ast_structure("eval_input")
+def test_parser_ternary_expressions(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
+
+
+CALL_EXPRESSIONS = (
+    ("call my_func", "call_expr(call, identifier(my_func), arguments)"),
+    ("call run 10", "call_expr(call, identifier(run), arguments(integer_literal(10)))"),
+    ("call run 1 2 3", "call_expr(call, identifier(run), arguments(integer_literal(1), integer_literal(2), integer_literal(3)))"),
+)
+@pytest.mark.parametrize("source, expected_ast", [*CALL_EXPRESSIONS])
+@assert_ast_structure("eval_input")
+def test_parser_call_expressions(moon_parser: Lark, source: str, expected_ast: str) -> None: ...

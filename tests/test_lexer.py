@@ -6,9 +6,7 @@ from typing import Any, Callable, Optional
 from lark import Lark
 from lark.exceptions import UnexpectedCharacters
 
-
-def clean_type(token_type: str) -> str:
-    return token_type.split("__")[-1]
+from .utils import clean_type
 
 
 def assert_single_token(func: Callable[..., None]) -> Callable[..., None]:
@@ -44,7 +42,6 @@ def assert_single_token(func: Callable[..., None]) -> Callable[..., None]:
                 ), f"Token value mismatch for '{source}'. Expected '{expected_value}', got '{tokens[0].value}'"
 
         return func(moon_parser, source, *args, **kwargs)
-
     return wrapper
 
 
@@ -94,7 +91,7 @@ KEYWORDS = (
 )
 @pytest.mark.parametrize("source, expected_type", [*KEYWORDS])
 @assert_single_token
-def test_lexer_keywords(moon_parser, source: str, expected_type: str) -> None: ...
+def test_lexer_keywords(moon_parser: Lark, source: str, expected_type: str) -> None: ...
 
 
 OPERATORS = (
@@ -231,7 +228,7 @@ def test_lexer_escaped_string(moon_parser: Lark, source: str, expected_type: str
 
 
 IDENTIFIER = (
-    "🍎",
+    '🍎',
     "apple",
     "display_name",
     "Data_1",
@@ -252,7 +249,73 @@ IDENTIFIER = (
 def test_lexer_identifier(moon_parser: Lark, source: str, expected_type: str, expected_value: str) -> None: ...
 
 
-@pytest.mark.parametrize("invalid_token", [
+@pytest.mark.parametrize("source, n_expected", [
+    ('\n', 1),
+    ("\r\n", 1),
+    ("\n\n", 1),
+    ("thing\nthing\n", 2),
+    ("thing\r\nthing\r\n", 2),
+    ("thing\n\nthing\n", 2),
+    ("thing\r\n\r\nthing\r\n", 2),
+    ("thing\n    thing\n", 2),
+])
+def test_lexer_newline(moon_parser: Lark, source: str, n_expected: int) -> None:
+    tokens = list(moon_parser.lex(source))
+
+    n_newline = [t for t in tokens if clean_type(t.type) == "_NEWLINE"]
+    assert len(n_newline) == n_expected
+
+
+@pytest.mark.parametrize("source, expected_n_indent, expected_n_dedent", [
+    ('\t', 0, 0),
+    ("\t\t", 0, 0),
+    ("thing\n\t0", 1, 1),
+    ("thing\n    a", 1, 1),
+    ("thing\n\tthing\n\t\ta", 2, 2),
+    ("thing\n    thing\n        a", 2, 2),
+    ("""to_guess is 14
+
+# Version using while, skip and stop
+
+while true
+    guess is ask "Type your guess: "
+
+    if guess isnt to_guess
+        if guess < to_guess
+            print "Its More"
+        else
+            print "Its Less"
+        skip
+
+    stop
+
+print 'Congrats you won !'""", 4, 4),
+    ("""var is 14
+while true
+    guess is ask "Type your guess: "
+
+    if guess isnt var
+        if guess > 1
+            if guess > 2
+                if guess > 3
+                    if guess > 4
+                        print "Its More (:"
+        skip
+    stop
+
+print 'Congrats you won !'""", 6, 6),
+])
+def test_lexer_tabulation(moon_parser: Lark, source: str, expected_n_indent: int, expected_n_dedent: int) -> None:
+    tokens = list(moon_parser.lex(source))
+
+    n_indent = [t for t in tokens if clean_type(t.type) == "_INDENT"]
+    n_dedent = [t for t in tokens if clean_type(t.type) == "_DEDENT"]
+
+    assert len(n_indent) == expected_n_indent
+    assert len(n_dedent) == expected_n_dedent
+
+
+@pytest.mark.parametrize("source", [
     '$',
     '@',
     '&',
@@ -260,6 +323,90 @@ def test_lexer_identifier(moon_parser: Lark, source: str, expected_type: str, ex
     '~',
     '`',
 ])
-def test_invalid_tokens(moon_parser: Lark, invalid_token):
+def test_lexer_invalid_tokens(moon_parser: Lark, source: str) -> None:
     with pytest.raises(UnexpectedCharacters):
-        list(moon_parser.lex(invalid_token))
+        list(moon_parser.lex(source))
+
+
+@pytest.mark.parametrize("source", [
+    ' ',
+    '\t',
+    '\f',
+    "thing   ",
+    "thing\tthing",
+])
+def test_lexer_ignored_whitespace(moon_parser: Lark, source: str) -> None:
+    tokens = list(moon_parser.lex(source))
+
+    assert all(t.type != "WS" for t in tokens)
+
+
+@pytest.mark.parametrize("source", [
+    "# this is a (single line comment)\n",
+    "( this is a multi-line\n comment \n \n \n\n ((: )\n",
+    "(\n\n\n\n this is a multi-line comment \n \n \n\n ((: )\n",
+])
+def test_lexer_ignored_comment(moon_parser: Lark, source: str) -> None:
+    tokens = list(moon_parser.lex(source))
+
+    assert len(tokens) == 1
+    assert tokens[0].type == "_NEWLINE"
+
+
+INVALID_IDENTIFIER = (
+    "1apple",
+    "100_000",
+    "🍎apple",
+    "apple🍎",
+    "w🐋e",
+    "10_",
+    # "_",
+)
+@pytest.mark.parametrize("source", [*INVALID_IDENTIFIER])
+def test_lexer_invalid_identifier(moon_parser: Lark, source: str) -> None:
+    try:
+        tokens = list(moon_parser.lex(source))
+
+        if len(tokens) == 1:
+            assert clean_type(tokens[0].type) != "IDENTIFIER"
+    except UnexpectedCharacters:
+        pass
+
+
+@pytest.mark.parametrize("source, expected_line", [
+    (r'', 0),
+    (r"""1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+""", 11),
+    (r"""
+""", 1),
+    (r"""
+
+
+
+
+
+
+
+
+
+expression
+""", 11)
+    ]
+)
+def test_line_numbers(moon_parser: Lark, source: str, expected_line: int) -> None:
+    tokens = list(moon_parser.lex(source))
+
+    if tokens:
+        assert tokens[-1].line == expected_line
+    else:
+        assert expected_line == 0

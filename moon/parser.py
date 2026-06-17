@@ -27,6 +27,7 @@ def build_parser(
 			parser="lalr",
 			postlex=MoonIndenter(),
 			start=["start", "file_input", "eval_input"],
+			lexer="contextual",
 			*args,
 			**kwargs,
 		)
