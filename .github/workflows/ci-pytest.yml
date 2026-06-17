@@ -45,7 +45,7 @@ jobs:
       run: |
         pytest tests --doctest-modules \
         --junitxml=junit/test-results-${{ matrix.python-version }}.xml \
-        --cov=obdii \
+        --cov=moon \
         --cov-report=xml:coverage-${{ matrix.python-version }}.xml \
         --cov-report=html:htmlcov-${{ matrix.python-version }} \
         --cov-report=term-missing \
