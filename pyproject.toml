@@ -36,7 +36,7 @@ Issues = "https://github.com/PaulMarisOUMary/Moon/issues"
 Changelog = "https://github.com/PaulMarisOUMary/Moon/releases"
 
 [project.scripts]
-moon = "moon.cli:cli"
+moon = "moon.cli:app"
 
 [project.optional-dependencies]
 test = [
@@ -82,8 +82,15 @@ pythonVersion = "3.10"
 typeCheckingMode = "basic"
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
+addopts = "--cov=moon --cov-report=term-missing --cov-fail-under=60"
+
+[tool.coverage.run]
+omit = [
+    "moon/cli/*",
+]
 
 # [tool.ruff]
 # exclude = [
