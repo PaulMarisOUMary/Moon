@@ -21,13 +21,13 @@
 use_statement: use_name | use_from
 
 // Import from a file or a named module
-use_from: FROM (ESCAPED_STRING | identifier) use_name
+use_from: FROM (ESCAPED_STRING | dotted_path) use_name
 
 // List of imported names
-use_name: USE (use_target (use_as)?)+
+use_name: USE STAR_IMPORT
+        | USE use_target+
 
-?use_target: identifier
-           | STAR_IMPORT
+use_target: identifier use_as?
 
 // "Import all"
 STAR_IMPORT: "*"
