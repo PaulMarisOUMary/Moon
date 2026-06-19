@@ -77,7 +77,7 @@ KEYWORDS = (
         ("not", "NOT"),
         ("or", "OR"),
         # ("pass", "PASS"),         #🔒
-        # ("raise", "RAISE"),       #🔒
+        ("raise", "RAISE"),
         ("result", "RESULT"),
         ("test", "TEST"),
         ("thing", "THING"),
@@ -94,6 +94,23 @@ KEYWORDS = (
 def test_lexer_keywords(moon_parser: Lark, source: str, expected_type: str) -> None: ...
 
 
+AMBIGUOUS_TERMS = (
+    ('.', "DOT"),
+    ("...", "ELLIPSIS"),
+    ('/', "DIVIDE"),
+    ("//", "FLOOR"),
+    ('<', "LT"),
+    ("<=", "LTE"),
+    ('>', "GT"),
+    (">=", "GTE"),
+    ("is", "IS"),
+    ("isnt", "ISNT"),
+)
+@pytest.mark.parametrize("source, expected_type", [*AMBIGUOUS_TERMS])
+@assert_single_token
+def test_lexer_ambiguous_terms(moon_parser: Lark, source: str, expected_type: str) -> None: ...
+
+
 OPERATORS = (
     ('+', "PLUS"),
     ('-', "MINUS"),
@@ -102,9 +119,9 @@ OPERATORS = (
     ("//", "FLOOR"),
     ("%", "MODULO"),
     ("**", "POWER"),
-    ("<", "LT"),
+    ('<', "LT"),
     ("<=", "LTE"),
-    (">", "GT"),
+    ('>', "GT"),
     (">=", "GTE"),
     ("is", "IS"),
     ("isnt", "ISNT"),
@@ -319,6 +336,11 @@ def test_lexer_tabulation(moon_parser: Lark, source: str, expected_n_indent: int
     '$',
     '@',
     '&',
+    '=',
+    '}',
+    '{',
+    '[',
+    ']',
     '^',
     '~',
     '`',

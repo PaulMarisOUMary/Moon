@@ -85,9 +85,12 @@ typeCheckingMode = "basic"
 pythonpath = ["."]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "--cov=moon --cov-report=term-missing --cov-fail-under=60"
+addopts = "--cov-report=term-missing --cov-fail-under=60"
 
 [tool.coverage.run]
+include = [
+    "moon/**/*.py"
+]
 omit = [
     "moon/cli/*",
 ]
@@ -121,6 +124,9 @@ omit = [
 
 # [tool.ty.environment]
 # python-platform = "all"
+
+[tool.bandit]
+exclude_dirs = ["tests"]
 
 [tool.bandit.assert_used]
 skips = ["*_test.py", "*/test_*.py"]

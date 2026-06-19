@@ -2,7 +2,7 @@
 
 
 
-%import .expressions (_FROM, _USE, _AS, DOT, ESCAPED_STRING)
+%import .expressions (_FROM, _USE, _AS, _DOT, ESCAPED_STRING)
 %import .expressions (identifier)
 
 // Re-export
@@ -48,4 +48,4 @@ STAR_IMPORT: "*"
 
 use_as: _AS identifier
 
-dotted_path: identifier (DOT identifier)*
+dotted_path: identifier (_DOT identifier)*

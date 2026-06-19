@@ -18,7 +18,7 @@
 %import .terminals (_LIST, _DICT)
 %import .terminals (_THING, _HAS)
 %import .terminals (_TEST, _FAIL, _RAISE)
-%import .terminals (_ELLIPSIS, DOT)
+%import .terminals (_ELLIPSIS, _DOT)
 %import .terminals (_FROM, _USE, _AS)
 %import .terminals (PRINT, ASK, RANDOM, TIME, SLEEP)
 %import .terminals (_NEWLINE, _INDENT, _DEDENT)

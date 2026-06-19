@@ -20,7 +20,7 @@
 %import .literals (_ACTION, _RESULT)
 %import .literals (_THING, _HAS)
 %import .literals (_TEST, _FAIL, _RAISE)
-%import .literals (_ELLIPSIS, DOT)
+%import .literals (_ELLIPSIS, _DOT)
 %import .literals (_FROM, _USE, _AS)
 %import .literals (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
 

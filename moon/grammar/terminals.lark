@@ -29,7 +29,7 @@ BLOCK_COMMENT: /\([\s\S]*?\)/
 // Punctuation
 
 _ELLIPSIS: "..."
-DOT: "."
+_DOT: "."
 
 // Primitive Literals
 
