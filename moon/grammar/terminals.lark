@@ -28,7 +28,7 @@ BLOCK_COMMENT: /\([\s\S]*?\)/
 
 // Punctuation
 
-ELLIPSIS: "..."
+_ELLIPSIS: "..."
 DOT: "."
 
 // Primitive Literals
@@ -95,18 +95,17 @@ OR: "or"
 NOT: "not"
 
 // Composites
-LIST: "list"
-DICT: "dict"
+_LIST: "list"
+_DICT: "dict"
 
 // Classes ("thing")
-THING: "thing"
-HAS: "has"
-DEFAULT: "default"
+_THING: "thing"
+_HAS: "has"
 
 // Functions ("action")
-ACTION: "action"
-RESULT: "result"
-CALL: "call"
+_ACTION: "action"
+_RESULT: "result"
+_CALL: "call"
 
 // Native functions
 PRINT: "print"
@@ -115,35 +114,36 @@ RANDOM: "random"
 TIME: "time"
 SLEEP: "sleep"
 
-// Imports / modules/
-FROM: "from"
-USE: "use"
-AS: "as"
+// Imports / modules
+_FROM: "from"
+_USE: "use"
+_AS: "as"
 
 // Conditional Control Flow
-IF: "if"
-ELSE: "else"
-ELIF: "elif"
+_IF: "if"
+_ELSE: "else"
+_ELIF: "elif"
 
 // Loops
-WHILE: "while"
-STOP: "stop"
-SKIP: "skip"
-FOR: "for"
-IN: "in"
+_WHILE: "while"
+_STOP: "stop"
+_SKIP: "skip"
 
 // Error Handling
-TEST: "test"
-FAIL: "fail"
-RAISE: "raise"
-ERROR: "error"
-ASSERT: "assert"
+_TEST: "test"
+_FAIL: "fail"
+_RAISE: "raise"
 
-// Reserved keywords (unused for now)
+// Reserved keywords (unused for now, kept for reservation)
+ASSERT: "assert"
 ASYNC: "async"
 AWAIT: "await"
+// DEFAULT: "default"
 END: "end"
+ERROR: "error"
+FOR: "for"
 GLOBAL: "global"
+IN: "in"
 LAMBDA: "lambda"
 NOTHING: "nothing"
 PASS: "pass"

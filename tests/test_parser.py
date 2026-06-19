@@ -237,8 +237,8 @@ def test_parser_relational_expressions(moon_parser: Lark, source: str, expected_
 
 
 TERNARY_EXPRESSIONS = (
-    ("x if true else y", "expression(var(identifier(x)), if, true_literal, else, var(identifier(y)))"),
-    ("x if a else y if b else z", "expression(var(identifier(x)), if, var(identifier(a)), else, expression(var(identifier(y)), if, var(identifier(b)), else, var(identifier(z))))"),
+    ("x if true else y", "expression(var(identifier(x)), true_literal, var(identifier(y)))"),
+    ("x if a else y if b else z", "expression(var(identifier(x)), var(identifier(a)), expression(var(identifier(y)), var(identifier(b)), var(identifier(z))))"),
 )
 @pytest.mark.parametrize("source, expected_ast", [*TERNARY_EXPRESSIONS])
 @assert_ast_structure("eval_input")
@@ -246,9 +246,9 @@ def test_parser_ternary_expressions(moon_parser: Lark, source: str, expected_ast
 
 
 CALL_EXPRESSIONS = (
-    ("call my_func", "call_expr(call, identifier(my_func), arguments)"),
-    ("call run 10", "call_expr(call, identifier(run), arguments(integer_literal(10)))"),
-    ("call run 1 2 3", "call_expr(call, identifier(run), arguments(integer_literal(1), integer_literal(2), integer_literal(3)))"),
+    ("call my_func", "call_expr(identifier(my_func), arguments)"),
+    ("call run 10", "call_expr(identifier(run), arguments(integer_literal(10)))"),
+    ("call run 1 2 3", "call_expr(identifier(run), arguments(integer_literal(1), integer_literal(2), integer_literal(3)))"),
 )
 @pytest.mark.parametrize("source, expected_ast", [*CALL_EXPRESSIONS])
 @assert_ast_structure("eval_input")

@@ -2,37 +2,50 @@
 
 
 
-%import .expressions (identifier, expression)
-%import .expressions (FROM, USE, AS, DOT, ESCAPED_STRING)
+%import .expressions (_FROM, _USE, _AS, DOT, ESCAPED_STRING)
+%import .expressions (identifier)
 
-// Re-export for downstream files
+// Re-export
+%import .expressions (expression, or_expr, and_expr, not_expr_, not_expr)
+%import .expressions (comp_expr, comp_operator, arith_expr, add_operator)
+%import .expressions (term, mul_operator, factor, unary_operator, power)
+%import .expressions (atom, var, call_expr, arguments, builtin_call, builtin_name)
+%import .expressions (method_call)
+%import .expressions (list_expr, list_item, dict_expr, dict_item)
+%import .expressions (literal, null_literal, boolean_literal, true_literal, false_literal)
+%import .expressions (number_literal, integer_literal, float_literal, string_literal)
+%import .expressions (_NULL, _TRUE, _FALSE)
+%import .expressions (SIGNED_INTEGER, SIGNED_FLOAT, IDENTIFIER)
 %import .expressions (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
 %import .expressions (LT, LTE, GT, GTE, IS, ISNT)
 %import .expressions (AND, OR, NOT)
-%import .expressions (IF, ELSE, ELIF)
-%import .expressions (LIST, DICT, CALL)
-%import .expressions (STOP, SKIP, RESULT, ELLIPSIS, RAISE, ERROR)
-%import .expressions (WHILE, TEST, FAIL)
-%import .expressions (ACTION, THING, HAS)
+%import .expressions (_IF, _ELSE, _ELIF)
+%import .expressions (_WHILE, _STOP, _SKIP)
+%import .expressions (_ACTION, _RESULT, _CALL)
+%import .expressions (_LIST, _DICT)
+%import .expressions (_THING, _HAS)
+%import .expressions (_TEST, _FAIL, _RAISE)
+%import .expressions (_ELLIPSIS)
+%import .expressions (PRINT, ASK, RANDOM, TIME, SLEEP)
 %import .expressions (_NEWLINE, _INDENT, _DEDENT)
 %import .expressions (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
 
+// Module / import system
+
 // Import statement entry point
-use_statement: use_name | use_from
+use_statement: use_from | use_name
+
+use_name: _USE identifier
 
 // Import from a file or a named module
-use_from: FROM (ESCAPED_STRING | dotted_path) use_name
+use_from: _FROM (ESCAPED_STRING | dotted_path) _USE use_target
 
-// List of imported names
-use_name: USE STAR_IMPORT
-        | USE use_target+
-
-use_target: identifier use_as?
+?use_target: identifier [use_as]
+           | STAR_IMPORT
 
 // "Import all"
 STAR_IMPORT: "*"
 
-use_as: AS identifier
+use_as: _AS identifier
 
-// Dotted path
 dotted_path: identifier (DOT identifier)*

@@ -1,22 +1,25 @@
 // moon.lark
 
-// Flat linear import order
-// moon.lark <- control_flow <- modules.lark <- expressions.lark <- literals.lark <- terminals.lark
-
-
+// Import chain (flat linear order)
+// moon.lark <- control_flow.lark <- modules.lark <- expressions.lark <- literals.lark <- terminals.lark
 
 %import .control_flow (statement, simple_statement, compound_statement, expression)
-%import .control_flow (_NEWLINE)
+
+// _NEWLINE, _INDENT, _DEDENT must be imported at the root level (moon.lark has no namespace
+%import .control_flow (_NEWLINE, _INDENT, _DEDENT)
 %import .control_flow (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
 
 // Entry points
-start: file_input
 
-file_input: (_NEWLINE | statement)*
+// File mode
+start:        file_input
+file_input:   (_NEWLINE | statement)*
 
+// REPL mode (one statement at a time)
 single_input: _NEWLINE | simple_statement | compound_statement _NEWLINE
 
-eval_input: expression _NEWLINE*
+// Eval mode (expression only)
+eval_input:   expression _NEWLINE*
 
 // Ignored tokens
 %ignore WS

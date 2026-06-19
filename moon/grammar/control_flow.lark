@@ -2,78 +2,100 @@
 
 
 
-%import .modules (identifier, expression, use_statement)
-%import .modules (IS, STOP, SKIP, RESULT, ELLIPSIS, RAISE, ERROR)
-%import .modules (IF, ELSE, ELIF, WHILE, TEST, FAIL)
-%import .modules (ACTION, THING, HAS)
+%import .modules (use_statement, use_from, use_name, use_target, use_as, STAR_IMPORT)
+%import .modules (expression, or_expr, and_expr, not_expr_, not_expr)
+%import .modules (comp_expr, comp_operator, arith_expr, add_operator)
+%import .modules (term, mul_operator, factor, unary_operator, power)
+%import .modules (atom, var, call_expr, arguments, builtin_call, builtin_name)
+%import .modules (method_call)
+%import .modules (list_expr, list_item, dict_expr, dict_item)
+%import .modules (literal, null_literal, boolean_literal, true_literal, false_literal)
+%import .modules (number_literal, integer_literal, float_literal, string_literal)
+%import .modules (identifier)
+
+// Re-export
+%import .modules (IS, ISNT, AND, OR, NOT)
+%import .modules (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
+%import .modules (LT, LTE, GT, GTE)
+%import .modules (_IF, _ELSE, _ELIF, _WHILE)
+%import .modules (_STOP, _SKIP, _RESULT, _RAISE, _ELLIPSIS)
+%import .modules (_ACTION, _THING, _HAS, _TEST, _FAIL)
+%import .modules (_LIST, _DICT)
 %import .modules (_NEWLINE, _INDENT, _DEDENT)
 %import .modules (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
 
-// Statement entry point
+// Statements
+
 ?statement: simple_statement | compound_statement
 
-// Simple statement
+// Simple statement (fits on one line)
 ?simple_statement: single_statement _NEWLINE
 
 ?single_statement: expression
-                  | assign_statement
-                  | stop_statement
-                  | skip_statement
-                  | result_statement
-                  | noop_statement
-                  | use_statement
-                  | raise_statement
+                 | assign_statement
+                 | stop_statement
+                 | skip_statement
+                 | result_statement
+                 | raise_statement
+                 | noop_statement
+                 | use_statement
 
-// Assignment
+// Compound statements (contain an indented block or end with _DEDENT)
+?compound_statement: while_statement
+                   | if_statement
+                   | action_statement
+                   | thing_statement
+                   | test_statement
+                   | list_assign_statement
+                   | dict_assign_statement
+
+// Simple statements
+
+// Variable assignment
 assign_statement: identifier IS expression
 
-// Loops skip & stop
-stop_statement: STOP
-skip_statement: SKIP
+// Loop control
+stop_statement: _STOP
+skip_statement: _SKIP
 
-// Function return
-result_statement: RESULT [expression]
+// Return value
+result_statement: _RESULT [expression]
 
-// No-op
-noop_statement: ELLIPSIS
+// Raise an error
+raise_statement: _RAISE expression
 
-// Manual error raising
-raise_statement: RAISE expression
-               | ERROR expression -> raise_statement
+// No-op / placeholder body
+noop_statement: _ELLIPSIS
 
-// Suite block
-suite: simple_statement | _NEWLINE _INDENT statement+ _DEDENT
+// Compound statements
 
-// Compound statement entry point
-?compound_statement: action_statement
-                    | thing_statement
-                    | while_statement
-                    | if_statement
-                    | test_statement
+// Loop
+while_statement: _WHILE expression suite
 
 // Conditionals
-if_statement: IF expression suite elif_branch* [ELSE suite]
+if_statement: _IF expression suite elif_branch* [_ELSE suite]
+elif_branch:  _ELIF expression suite
 
-elif_branch: ELIF expression suite
-
-// Loops
-while_statement: WHILE expression suite
-
-// Error handling test & fail
-test_statement: TEST suite [FAIL suite]
+// Structured error handling
+test_statement: _TEST suite (_FAIL suite)?
 
 // Functions
-action_statement: ACTION identifier parameters suite
-
+action_statement: _ACTION identifier parameters suite
 parameters: identifier*
 
 // Classes
-thing_statement: THING identifier [inheritance] thing_suite
-
-thing_suite: simple_statement | _NEWLINE _INDENT (statement | attribute)+ _DEDENT
-
-// Inheritance
+thing_statement: _THING identifier [inheritance] thing_suite
 inheritance: IS identifier
 
+// List / dict assignment
+list_assign_statement: identifier IS list_expr
+dict_assign_statement: identifier IS dict_expr
+
+// Suites
+
+suite: _NEWLINE _INDENT statement+ _DEDENT
+
+thing_suite: _NEWLINE _INDENT (statement | attribute)+ _DEDENT
+
 // Properties
-attribute: HAS identifier _NEWLINE
+attribute: _HAS identifier _NEWLINE

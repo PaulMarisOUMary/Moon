@@ -1,76 +1,80 @@
 // expressions.lark
 
 
-
-%import .literals (literal, identifier)
-%import .literals (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
-%import .literals (LT, LTE, GT, GTE, IS, ISNT)
+%import .literals (_IF, _ELSE, _CALL)
 %import .literals (AND, OR, NOT)
-%import .literals (IF, ELSE, ELIF)
-%import .literals (LIST, DICT, CALL)
-%import .literals (PRINT, ASK, RANDOM, TIME, SLEEP)
-%import .literals (STOP, SKIP, RESULT, ELLIPSIS, RAISE, ERROR)
-%import .literals (WHILE, TEST, FAIL)
-%import .literals (ACTION, THING, HAS)
-%import .literals (FROM, USE, AS, DOT)
-%import .literals (ESCAPED_STRING)
+%import .literals (LT, LTE, GT, GTE, IS, ISNT)
+%import .literals (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
+%import .literals (_LIST, _DICT)
 %import .literals (_NEWLINE, _INDENT, _DEDENT)
+%import .literals (PRINT, ASK, RANDOM, TIME, SLEEP)
+
+// Re-export
+%import .literals (literal, null_literal, boolean_literal, true_literal, false_literal)
+%import .literals (number_literal, integer_literal, float_literal, string_literal)
+%import .literals (identifier)
+%import .literals (_NULL, _TRUE, _FALSE)
+%import .literals (SIGNED_INTEGER, SIGNED_FLOAT, ESCAPED_STRING, IDENTIFIER)
+%import .literals (_ELIF)
+%import .literals (_WHILE, _STOP, _SKIP)
+%import .literals (_ACTION, _RESULT)
+%import .literals (_THING, _HAS)
+%import .literals (_TEST, _FAIL, _RAISE)
+%import .literals (_ELLIPSIS, DOT)
+%import .literals (_FROM, _USE, _AS)
 %import .literals (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
 
-// Expression entry point
-?expression: or_expr (IF or_expr ELSE expression)?
+// Expression rules
 
-// Logical expressions
+// plain or ternary
+?expression: or_expr (_IF or_expr _ELSE expression)?
+
+// Logical
 ?or_expr: and_expr (OR and_expr)*
 ?and_expr: not_expr_ (AND not_expr_)*
 ?not_expr_: NOT not_expr_ -> not_expr
           | comp_expr
 
-// Relational expressions
-?comp_expr: expr (comp_operator expr)*
+// Comparison
+?comp_expr: arith_expr (comp_operator arith_expr)*
+!comp_operator: LT | LTE | GT | GTE | IS | ISNT
 
-!comp_operator: LT | GT | GTE | LTE | IS | ISNT
-
-// Arithmetic expressions
-?expr: arith_expr
+// Arithmetic
 ?arith_expr: term (add_operator term)*
-?term: factor (mul_operator factor)*
-?factor: unary_operator factor | power
-
-!unary_operator: PLUS | MINUS
 !add_operator: PLUS | MINUS
-!mul_operator: MULTIPLY | DIVIDE | MODULO | FLOOR
 
+?term: factor (mul_operator factor)*
+!mul_operator: MULTIPLY | DIVIDE | FLOOR | MODULO
+
+?factor: unary_operator factor | power
+!unary_operator: PLUS | MINUS
+
+// Exponentiation
 ?power: atom (POWER factor)?
 
-// Atoms
+// Atoms (all inline)
 ?atom: literal
      | identifier -> var
-     | list_expr
-     | dict_expr
      | call_expr
      | builtin_call
      | method_call
 
 // Function call
-call_expr: CALL identifier arguments
-
+call_expr: _CALL identifier arguments
 arguments: expression*
 
-// Builtin functions
+// Built-in functions
 builtin_call: builtin_name arguments
-
 !builtin_name: PRINT | ASK | RANDOM | TIME | SLEEP
 
-// Direct method call
+// Method call
 method_call: identifier identifier arguments
 
-list_expr: LIST _NEWLINE _INDENT list_item+ _DEDENT
-         | LIST -> empty_list_expr
 
+// List
+list_expr: _LIST _NEWLINE _INDENT list_item+ _DEDENT
 list_item: expression _NEWLINE
 
-dict_expr: DICT _NEWLINE _INDENT dict_item+ _DEDENT
-         | DICT -> empty_dict_expr
-
-dict_item: expression IS expression _NEWLINE
+// Dict
+dict_expr: _DICT _NEWLINE _INDENT dict_item+ _DEDENT
+dict_item: atom IS expression _NEWLINE
