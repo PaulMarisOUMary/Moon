@@ -1,7 +1,8 @@
 from functools import wraps
 from typing import Any, Callable
 
-from lark import Lark, Token, Tree
+from pytest import raises
+from lark import Lark, Token, Tree, LarkError
 
 from ..utils import clean_type
 
@@ -55,6 +56,23 @@ def assert_ast_structure(start: str = "file_input", crop_root: bool = True) -> C
                 f"Expected : {expected_ast}\n"
                 f"Got      : {actual_ast}"
             )
+
+            return func(moon_parser, source, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def assert_parse_error(start: str = "file_input") -> Callable[..., Any]:
+    need_format = start != "eval_input"
+
+    def decorator(func: Callable[..., None]) -> Callable[..., None]:
+        @wraps(func)
+        def wrapper(moon_parser: Lark, source: str, *args: Any, **kwargs: Any) -> None:
+            if need_format and not source.endswith('\n'):
+                source += '\n'
+
+            with raises(LarkError):
+                moon_parser.parse(source, start=start)
 
             return func(moon_parser, source, *args, **kwargs)
         return wrapper

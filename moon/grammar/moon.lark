@@ -16,7 +16,7 @@ start:        file_input
 file_input:   (_NEWLINE | statement)*
 
 // REPL mode (one statement at a time)
-single_input: _NEWLINE | simple_statement | compound_statement _NEWLINE
+single_input: _NEWLINE | simple_statement | compound_statement
 
 // Eval mode (expression only)
 eval_input:   expression _NEWLINE*

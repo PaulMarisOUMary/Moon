@@ -1,3 +1,4 @@
 include LICENSE
 include requirements.txt
 include moon/py.typed
+include moon/grammar/*.lark
