@@ -22,7 +22,7 @@
 %import .literals (_TEST, _FAIL, _RAISE)
 %import .literals (_ELLIPSIS, _DOT)
 %import .literals (_FROM, _USE, _AS)
-%import .literals (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+%import .literals (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
 
 // Expression rules
 

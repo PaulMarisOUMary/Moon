@@ -7,7 +7,7 @@
 
 // _NEWLINE, _INDENT, _DEDENT must be imported at the root level (moon.lark has no namespace
 %import .control_flow (_NEWLINE, _INDENT, _DEDENT)
-%import .control_flow (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+%import .control_flow (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
 
 // Entry points
 
@@ -25,4 +25,4 @@ eval_input:   expression _NEWLINE*
 %ignore WS
 %ignore LINE_CONT
 %ignore COMMENT
-%ignore BLOCK_COMMENT
+%ignore INLINE_BLOCK_COMMENT

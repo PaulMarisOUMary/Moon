@@ -9,7 +9,8 @@
 
 // A newline separates statements
 // Absorb also subsequent lines that only contain spaces/tabs/comments/
-_NEWLINE: ( /\r?\n[\t ]*/ | COMMENT )+
+_NL: /\r?\n[\t ]*/
+_NEWLINE: _NL ( (COMMENT | _BLOCK_COMMENT) _NL | _NL )*
 
 // Horizontal spaces (token separators), ignored by the parser
 WS: /[\t \f]+/
@@ -19,12 +20,12 @@ LINE_CONT: /\\[\t \f]*\r?\n/
 
 // Comments
 
-// Single-line comment
+// Simple comment
 COMMENT: /#[^\n]*/
 
-// Multi-line comment
-BLOCK_COMMENT: /\([\s\S]*?\)/
-// BLOCK_COMMENT: /#\([\s\S]*?\)#/ // Alternative idea
+// Block comments
+_BLOCK_COMMENT: /\([^)]*\)/
+INLINE_BLOCK_COMMENT: _BLOCK_COMMENT
 
 // Punctuation
 

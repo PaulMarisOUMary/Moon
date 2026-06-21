@@ -22,7 +22,7 @@
 %import .terminals (_FROM, _USE, _AS)
 %import .terminals (PRINT, ASK, RANDOM, TIME, SLEEP)
 %import .terminals (_NEWLINE, _INDENT, _DEDENT)
-%import .terminals (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+%import .terminals (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
 %import .terminals (ASSERT, ASYNC, AWAIT, DEFAULT, END, ERROR, FOR, GLOBAL, IN, LAMBDA, NOTHING, PASS, YIELD)
 
 // Literals

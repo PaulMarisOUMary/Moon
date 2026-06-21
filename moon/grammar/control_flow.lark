@@ -22,7 +22,7 @@
 %import .modules (_ACTION, _THING, _HAS, _TEST, _FAIL)
 %import .modules (_LIST, _DICT)
 %import .modules (_NEWLINE, _INDENT, _DEDENT)
-%import .modules (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+%import .modules (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
 
 // Statements
 

@@ -28,7 +28,7 @@
 %import .expressions (_ELLIPSIS)
 %import .expressions (PRINT, ASK, RANDOM, TIME, SLEEP)
 %import .expressions (_NEWLINE, _INDENT, _DEDENT)
-%import .expressions (WS, LINE_CONT, COMMENT, BLOCK_COMMENT)
+%import .expressions (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
 
 // Module / import system
 
