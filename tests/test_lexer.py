@@ -6,7 +6,7 @@ from typing import Any, Callable, Optional
 from lark import Lark
 from lark.exceptions import UnexpectedCharacters
 
-from .utils import clean_type
+from moon.utils import clean_type
 
 
 def assert_single_token(func: Callable[..., None]) -> Callable[..., None]:

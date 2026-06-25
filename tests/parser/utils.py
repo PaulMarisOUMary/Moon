@@ -4,7 +4,7 @@ from typing import Any, Callable
 from pytest import raises
 from lark import Lark, Token, Tree, LarkError
 
-from ..utils import clean_type
+from moon.utils import clean_type
 
 
 def ast_to_str(node: Tree | Token | None, is_root: bool = False) -> str:

@@ -306,10 +306,12 @@ class Transformer(LTransformer):
 
     def list_assign_statement(self, items: list[Any]) -> ListAssignStatement:
         name, value = items
+        raise NotImplementedError
         return ListAssignStatement(name=name, value=value)
 
     def dict_assign_statement(self, items: list[Any]) -> DictAssignStatement:
         name, value = items
+        raise NotImplementedError
         return DictAssignStatement(name=name, value=value)
 
     def stop_statement(self, items: list[Any]) -> StopStatement:

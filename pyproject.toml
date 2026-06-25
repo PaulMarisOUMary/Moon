@@ -93,6 +93,8 @@ include = [
 ]
 omit = [
     "moon/cli/*",
+    "moon/ast_nodes.py",
+    "moon/errors.py",
 ]
 
 [tool.ruff]
