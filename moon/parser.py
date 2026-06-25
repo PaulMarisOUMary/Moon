@@ -6,7 +6,7 @@ from lark.indenter import Indenter
 
 
 LARK_FILE = Path("grammar/moon.lark")
-REL_PATH = Path(__file__).parent
+REL_PATH = Path(__file__)
 
 
 class MoonIndenter(Indenter):
