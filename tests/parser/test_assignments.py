@@ -7,6 +7,7 @@ from .utils import assert_ast_structure
 
 START = "file_input"
 
+
 ASSIGN_STATEMENT_SCALAR = (
     ("x is 5", "assign_statement(identifier(x), is, integer_literal(5))"),
     ("x is 1.5", "assign_statement(identifier(x), is, float_literal(1.5))"),
