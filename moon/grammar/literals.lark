@@ -1,0 +1,52 @@
+// literals.lark
+
+
+
+%import .terminals (_NULL, _TRUE, _FALSE)
+%import .terminals (SIGNED_INTEGER, SIGNED_FLOAT, ESCAPED_STRING, IDENTIFIER)
+
+// Re-export terminals for downstream files
+%import .terminals (DIGIT, HEXDIGIT, INTEGER, DECIMAL, EXP, FLOAT)
+%import .terminals (_STRING_INNER, _STRING_ESC_INNER, DOUBLE_QUOTED_STRING, SINGLE_QUOTED_STRING)
+%import .terminals (NAME, EMOJI)
+%import .terminals (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
+%import .terminals (LT, LTE, GT, GTE, IS, ISNT)
+%import .terminals (AND, OR, NOT)
+%import .terminals (_IF, _ELSE, _ELIF)
+%import .terminals (_WHILE, _STOP, _SKIP)
+%import .terminals (_ACTION, _RESULT, _CALL)
+%import .terminals (_LIST, _DICT)
+%import .terminals (_THING, _HAS)
+%import .terminals (_TEST, _FAIL, _RAISE)
+%import .terminals (_ELLIPSIS, _DOT)
+%import .terminals (_FROM, _USE, _AS)
+%import .terminals (PRINT, ASK, RANDOM, TIME, SLEEP)
+%import .terminals (_NEWLINE, _INDENT, _DEDENT)
+%import .terminals (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
+%import .terminals (ASSERT, ASYNC, AWAIT, DEFAULT, END, ERROR, FOR, GLOBAL, IN, LAMBDA, NOTHING, PASS, YIELD)
+
+// Literals
+?literal: null_literal
+        | boolean_literal
+        | number_literal
+        | string_literal
+
+// Null
+null_literal: _NULL
+
+// Booleans
+boolean_literal: _TRUE  -> true_literal
+               | _FALSE -> false_literal
+
+// Numbers
+integer_literal: SIGNED_INTEGER
+float_literal:   SIGNED_FLOAT
+
+?number_literal: integer_literal
+               | float_literal
+
+// Strings
+string_literal: ESCAPED_STRING
+
+// Identifier (variable / name reference)
+identifier: IDENTIFIER

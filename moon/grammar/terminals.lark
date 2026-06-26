@@ -1,0 +1,151 @@
+// terminals.lark
+
+
+
+// Indentation (Lark post-lexer managed)
+%declare _INDENT _DEDENT
+
+// Whitespaces, newlines, line continuation
+
+// A newline separates statements
+// Absorb also subsequent lines that only contain spaces/tabs/comments/
+_NL: /\r?\n[\t ]*/
+_NEWLINE: _NL ( (COMMENT | _BLOCK_COMMENT) _NL | _NL )*
+
+// Horizontal spaces (token separators), ignored by the parser
+WS: /[\t \f]+/
+
+// Allows continuing a statement on the nextline without triggering a _NEWLINE
+LINE_CONT: /\\[\t \f]*\r?\n/
+
+// Comments
+
+// Simple comment
+COMMENT: /#[^\n]*/
+
+// Block comments
+_BLOCK_COMMENT: /\([^)]*\)/
+INLINE_BLOCK_COMMENT: _BLOCK_COMMENT
+
+// Punctuation
+
+_ELLIPSIS: "..."
+_DOT: "."
+
+// Primitive Literals
+
+_NULL: "null"
+_TRUE: "true"
+_FALSE: "false"
+
+// Numbers
+
+DIGIT: /[0-9]/
+HEXDIGIT: /[0-9a-fA-F]/
+
+INTEGER: DIGIT+
+SIGNED_INTEGER: [PLUS | MINUS] INTEGER
+
+DECIMAL: DIGIT+ "." DIGIT* | "." DIGIT+
+EXP: /[eE][+-]?[0-9]+/
+
+FLOAT: INTEGER EXP | DECIMAL [EXP]
+SIGNED_FLOAT: [PLUS | MINUS] FLOAT
+
+// Strings
+
+_STRING_INNER: /.*?/
+_STRING_ESC_INNER: _STRING_INNER /(?<!\\)(\\\\)*?/
+
+DOUBLE_QUOTED_STRING: "\"" _STRING_ESC_INNER "\""
+SINGLE_QUOTED_STRING: "'" _STRING_ESC_INNER "'"
+
+ESCAPED_STRING: SINGLE_QUOTED_STRING | DOUBLE_QUOTED_STRING
+
+// Identifiers
+
+// Classic identifier
+NAME: /[^\W\d]\w*/
+
+// Emoji identifier
+EMOJI: /[\U0000231A-\U0001FAFF]/
+// EMOJIS: /(\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff])/g // Alternative idea
+
+IDENTIFIER: NAME | EMOJI
+
+// Operators
+PLUS: "+"
+MINUS: "-"
+MULTIPLY: "*"
+DIVIDE: "/"
+FLOOR: "//"
+MODULO: "%"
+POWER: "**"
+
+// Relational Operators (comparison)
+LT: "<"
+LTE: "<="
+GT: ">"
+GTE: ">="
+IS: "is"
+ISNT: "isnt"
+
+// Logical Operators
+AND: "and"
+OR: "or"
+NOT: "not"
+
+// Composites
+_LIST: "list"
+_DICT: "dict"
+
+// Classes ("thing")
+_THING: "thing"
+_HAS: "has"
+
+// Functions ("action")
+_ACTION: "action"
+_RESULT: "result"
+_CALL: "call"
+
+// Native functions
+PRINT: "print"
+ASK: "ask"
+RANDOM: "random"
+TIME: "time"
+SLEEP: "sleep"
+
+// Imports / modules
+_FROM: "from"
+_USE: "use"
+_AS: "as"
+
+// Conditional Control Flow
+_IF: "if"
+_ELSE: "else"
+_ELIF: "elif"
+
+// Loops
+_WHILE: "while"
+_STOP: "stop"
+_SKIP: "skip"
+
+// Error Handling
+_TEST: "test"
+_FAIL: "fail"
+_RAISE: "raise"
+
+// Reserved keywords (unused for now, kept for reservation)
+ASSERT: "assert"
+ASYNC: "async"
+AWAIT: "await"
+// DEFAULT: "default"
+END: "end"
+ERROR: "error"
+FOR: "for"
+GLOBAL: "global"
+IN: "in"
+LAMBDA: "lambda"
+NOTHING: "nothing"
+PASS: "pass"
+YIELD: "yield"

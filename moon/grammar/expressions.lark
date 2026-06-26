@@ -1,0 +1,80 @@
+// expressions.lark
+
+
+%import .literals (_IF, _ELSE, _CALL)
+%import .literals (AND, OR, NOT)
+%import .literals (LT, LTE, GT, GTE, IS, ISNT)
+%import .literals (PLUS, MINUS, MULTIPLY, DIVIDE, FLOOR, MODULO, POWER)
+%import .literals (_LIST, _DICT)
+%import .literals (_NEWLINE, _INDENT, _DEDENT)
+%import .literals (PRINT, ASK, RANDOM, TIME, SLEEP)
+
+// Re-export
+%import .literals (literal, null_literal, boolean_literal, true_literal, false_literal)
+%import .literals (number_literal, integer_literal, float_literal, string_literal)
+%import .literals (identifier)
+%import .literals (_NULL, _TRUE, _FALSE)
+%import .literals (SIGNED_INTEGER, SIGNED_FLOAT, ESCAPED_STRING, IDENTIFIER)
+%import .literals (_ELIF)
+%import .literals (_WHILE, _STOP, _SKIP)
+%import .literals (_ACTION, _RESULT)
+%import .literals (_THING, _HAS)
+%import .literals (_TEST, _FAIL, _RAISE)
+%import .literals (_ELLIPSIS, _DOT)
+%import .literals (_FROM, _USE, _AS)
+%import .literals (WS, LINE_CONT, COMMENT, INLINE_BLOCK_COMMENT)
+
+// Expression rules
+
+// plain or ternary
+?expression: or_expr (_IF or_expr _ELSE expression)?
+
+// Logical
+?or_expr: and_expr (OR and_expr)*
+?and_expr: not_expr_ (AND not_expr_)*
+?not_expr_: NOT not_expr_ -> not_expr
+          | comp_expr
+
+// Comparison
+?comp_expr: arith_expr (comp_operator arith_expr)*
+!comp_operator: LT | LTE | GT | GTE | IS | ISNT
+
+// Arithmetic
+?arith_expr: term (add_operator term)*
+!add_operator: PLUS | MINUS
+
+?term: factor (mul_operator factor)*
+!mul_operator: MULTIPLY | DIVIDE | FLOOR | MODULO
+
+?factor: unary_operator factor | power
+!unary_operator: PLUS | MINUS
+
+// Exponentiation
+?power: atom (POWER factor)?
+
+// Atoms (all inline)
+?atom: literal
+     | identifier -> var
+     | call_expr
+     | builtin_call
+     // | method_call
+
+// Function call
+call_expr: _CALL identifier arguments
+arguments: expression*
+
+// Built-in functions
+builtin_call: builtin_name arguments
+!builtin_name: PRINT | ASK | RANDOM | TIME | SLEEP
+
+// Method call
+method_call: identifier identifier arguments
+
+
+// List
+list_expr: _LIST _NEWLINE _INDENT list_item+ _DEDENT
+list_item: expression _NEWLINE
+
+// Dict
+dict_expr: _DICT _NEWLINE _INDENT dict_item+ _DEDENT
+dict_item: atom IS expression _NEWLINE
