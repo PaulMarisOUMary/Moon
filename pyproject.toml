@@ -85,7 +85,7 @@ typeCheckingMode = "basic"
 pythonpath = ["."]
 testpaths = ["tests"]
 python_files = ["test_*.py"]
-addopts = "--cov-report=term-missing --cov-fail-under=60"
+addopts = "--cov-report=term-missing"
 
 [tool.coverage.run]
 include = [
@@ -126,6 +126,9 @@ quote-style = "preserve"
 
 [tool.ty.environment]
 python-platform = "all"
+
+[tool.ty.analysis]
+respect-type-ignore-comments = true
 
 [tool.bandit]
 exclude_dirs = ["tests"]

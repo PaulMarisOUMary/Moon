@@ -234,10 +234,7 @@ class Transformer(LTransformer):
         return self.fold_binop(items)
 
     def power(self, items: list[Any]) -> Any:
-        if len(items) == 1:
-            return items[0]
-        base, exp = items
-        return BinOp(op="**", left=base, right=exp)
+        return self.fold_binop(items)
 
     def factor(self, items: list[Any]) -> Any:
         if len(items) == 1:
@@ -264,7 +261,7 @@ class Transformer(LTransformer):
         return self.fold_binop_keyword(items, "and")
 
     def not_expr(self, items: list[Any]) -> NotExpr:
-        return NotExpr(operand=items[0])
+        return NotExpr(operand=items[-1])
 
     # Calls
 
@@ -293,7 +290,7 @@ class Transformer(LTransformer):
         return ListExpr(items=list(items))
 
     def dict_item(self, items: list[Any]) -> DictItem:
-        return DictItem(key=items[0], value=items[1])
+        return DictItem(key=items[0], value=items[-1])
 
     def dict_expr(self, items: list[Any]) -> DictExpr:
         return DictExpr(items=list(items))
@@ -301,16 +298,16 @@ class Transformer(LTransformer):
     # Statements
 
     def assign_statement(self, items: list[Any]) -> AssignStatement:
-        name, value = items
+        name, value = items[0], items[-1]
         return AssignStatement(name=name, value=value)
 
     def list_assign_statement(self, items: list[Any]) -> ListAssignStatement:
-        name, value = items
+        name, value = items[0], items[-1]
         raise NotImplementedError
         return ListAssignStatement(name=name, value=value)
 
     def dict_assign_statement(self, items: list[Any]) -> DictAssignStatement:
-        name, value = items
+        name, value = items[0], items[-1]
         raise NotImplementedError
         return DictAssignStatement(name=name, value=value)
 

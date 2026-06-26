@@ -57,7 +57,7 @@
      | identifier -> var
      | call_expr
      | builtin_call
-     | method_call
+     // | method_call
 
 // Function call
 call_expr: _CALL identifier arguments

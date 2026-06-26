@@ -1,7 +1,7 @@
 from typer import Typer
 
 from .cmd_ast import view_ast
-from .cmd_run import run
+from .cmd_run import run, repl
 from .utils import inject_default_command
 
 
@@ -21,6 +21,10 @@ app.command(
     name="run",
     help="Run and evaluate Moon source files.",
 )(run)
+app.command(
+    name="repl",
+    help="Start an interactive Moon REPL session.",
+)(repl)
 
 
 inject_default_command(app)

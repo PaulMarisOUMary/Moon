@@ -10,10 +10,12 @@ class MoonError(Exception):
 
 # Transformer
 
+
 class MoonTransformError(MoonError): ...
 
 
 # Interpreter
+
 
 class MoonRuntimeError(MoonError): ...
 

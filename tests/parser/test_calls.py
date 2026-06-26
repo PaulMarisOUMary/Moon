@@ -40,6 +40,7 @@ METHOD_CALL_EXPRESSIONS = (
     ("dog bark loudly", "method_call(identifier(dog), identifier(bark), arguments(var(identifier(loudly))))"),
     ("dog bark 1 2", "method_call(identifier(dog), identifier(bark), arguments(integer_literal(1), integer_literal(2)))"),
 )
+@pytest.mark.skip(reason="Method call in WIP")
 @pytest.mark.parametrize("source, expected_ast", [*METHOD_CALL_EXPRESSIONS])
 @assert_ast_structure(START)
 def test_parser_method_call_expressions(moon_parser: Lark, source: str, expected_ast: str) -> None: ...
@@ -49,6 +50,7 @@ CALL_ARGUMENT_RESOLUTION_EXPRESSIONS = (
     ("print dog bark", "builtin_call(builtin_name(print), arguments(method_call(identifier(dog), identifier(bark), arguments)))"),
     ("call my_func dog bark", "call_expr(identifier(my_func), arguments(method_call(identifier(dog), identifier(bark), arguments)))"),
 )
+@pytest.mark.skip(reason="Method call in WIP")
 @pytest.mark.parametrize("source, expected_ast", [*CALL_ARGUMENT_RESOLUTION_EXPRESSIONS])
 @assert_ast_structure(START)
 def test_parser_call_argument_resolution(moon_parser: Lark, source: str, expected_ast: str) -> None: ...

@@ -1,4 +1,5 @@
-from typer import Option, echo
+from typer import Option, secho
+from typer.colors import YELLOW
 
 from .options import FileArg, StartOpt, StartRule
 
@@ -10,4 +11,7 @@ def view_ast(
         False, "-c", help="Print stringified AST instead of a tree shape."
     ),
 ) -> None:
-    echo(f"Parsing {file.name} to view AST (compact={compact})...")
+    secho(
+        f"Parsing {file.name} to view AST (compact={compact})...\nNot available.",
+        fg=YELLOW,
+    )
